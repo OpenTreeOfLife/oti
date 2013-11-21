@@ -95,7 +95,7 @@ public enum SearchableProperty {
 
 	MAPPED_OTT_ID_NODE (
 			"tree tip nodes by mapped ott id",
-			OTVocabularyPredicate.OT_OTT_TAXON_NAME,
+			OTVocabularyPredicate.OT_OTT_ID,
 			OTINodeIndex.TREE_NODES_BY_OT_PROPERTY),
 
 				
