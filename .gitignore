@@ -1,6 +1,9 @@
-*.class
-
-# Package Files #
-*.jar
-*.war
-*.ear
+.DS_Store
+*.pyc
+.classpath
+.settings*
+target*
+.project
+views/logging
+views/bitbucketcommands
+views/test_bitbucket.py
