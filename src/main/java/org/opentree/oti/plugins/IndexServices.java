@@ -31,7 +31,7 @@ import org.opentree.nexson.io.NexsonSource;
 import org.opentree.oti.QueryRunner;
 import org.opentree.oti.DatabaseManager;
 import org.opentree.oti.constants.SearchableProperty;
-import org.opentree.otu.exceptions.DuplicateSourceException;
+//import org.opentree.otu.exceptions.DuplicateSourceException;
 
 /**
  * services for indexing. very preliminary, should probably be reorganized (later).
@@ -128,7 +128,7 @@ public class IndexServices extends ServerPlugin {
 	public Representation indexSingleNexson(@Source GraphDatabaseService graphDb,
 			@Description("remote nexson url") @Parameter(name = "url", optional = false) String url,
 			@Description("source id under which this source will be indexed locally")
-				@Parameter(name = "sourceId", optional = false) String sourceId) throws MalformedURLException, IOException, DuplicateSourceException {
+				@Parameter(name = "sourceId", optional = false) String sourceId) throws MalformedURLException, IOException {
 
 		DatabaseManager dm = new DatabaseManager(graphDb);
 		NexsonSource source = readRemoteNexson(url, sourceId);
@@ -167,7 +167,7 @@ public class IndexServices extends ServerPlugin {
 	 * @param value
 	 * @return
 	 */
-	@Description("Get a list of properties that can be searched")
+	@Description("Perform a basic search on the stored indexes") // TODO: move to query runner
 	@PluginTarget(GraphDatabaseService.class)
 	public Representation search(@Source GraphDatabaseService graphDb,
 			@Description("The property to be searched on. A list of searchable properties is available from the getSearchableProperties service.")
@@ -177,7 +177,9 @@ public class IndexServices extends ServerPlugin {
 		
 		QueryRunner browser = new QueryRunner(graphDb);
 		SearchableProperty searchProperty = SearchableProperty.valueOf(property);
-		return ListRepresentation.string(browser.doBasicSearch(searchProperty, value));
+//		return ListRepresentation.string(browser.doBasicSearch(searchProperty, value));
+		
+		return OTRepresentationConverter.convert("not implemented");
 	}
 
 	/**

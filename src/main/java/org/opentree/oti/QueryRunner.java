@@ -56,16 +56,17 @@ public class QueryRunner extends OTIDatabase {
 		super(embeddedGraph);
 	}
 
-	/*
 	public QueryRunner(GraphDatabaseService gdbs) {
 		super(gdbs);
-		collectPropertySets();
+//		collectPropertySets();
 	}
 
 	public QueryRunner(GraphDatabaseAgent gdba) {
 		super(gdba);
-		collectPropertySets();
+//		collectPropertySets();
 	}
+
+	/*
 
 	public Iterable<String> getAvailableSourceProperties() {
 		return availableSourceProperties;
