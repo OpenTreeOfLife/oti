@@ -3,6 +3,7 @@ package org.opentree.oti.constants;
 import java.util.HashMap;
 import java.util.List;
 
+import org.opentree.oti.indexproperties.IndexedPrimitiveProperties;
 import org.opentree.properties.OTPropertyPredicate;
 import org.opentree.properties.OTVocabularyObject;
 import org.opentree.properties.OTVocabularyPredicate;
@@ -78,7 +79,7 @@ public enum OTIConstants {
 //	public static final String TREE_ID_SUFFIX = "TreeId";
 //	public static final String LOCAL_TREEID_PREFIX = "__local_id_";
 
-	public static final String WHITESPACE_SUBSTITUTE_FOR_SEARCH = "%s%";
+//	public static final String WHITESPACE_SUBSTITUTE_FOR_SEARCH = "%s%";
 
 	/* 
 
@@ -276,104 +277,153 @@ public enum OTIConstants {
 	    OT_YEAR *
 		
 	}; */
-	
-	/**
-	 * Properties to be indexed exactly under the defined property name (there are others that we
-	 * index in other ways, see DatabaseIndexer for examples).
-	 */
-	public static final SearchableProperty[] TREE_PROPERTIES_FOR_SIMPLE_INDEXING = {
-		SearchableProperty.BRANCH_LENGTH_MODE,
-		SearchableProperty.TAG_TREE
-		
-		/* TODO: add to SearchableProperty enum to enable searching these
-		OT_AGE
-		OT_AGE_MIN 
-		OT_AGE_MAX 
-		OT_AUTHOR_CONTRIBUTED 
-		OT_BRANCH_LENGTH_DESCRIPTION 
-		OT_BRANCH_LENGTH_MODE
-		OT_NODE_LABEL 
-		OT_NODE_LABEL_DESCRIPTION 
-		OT_NODE_LABEL_MODE 
-		OT_COMMENT 
-		OT_CURATOR_NAME
-		OT_DATA_DEPOSIT
-		OT_FOCAL_CLADE 
-		OT_INFERENCE_METHOD 
-		OT_INGROUP_CLADE
-		OT_IS_INGROUP 
-		OT_IS_OTU 
-		OT_ORIGINAL_LABEL 
-		OT_OTT_ID 
-		OT_OTT_TAXON_NAME 
-		OT_PARENT 
-	    OT_PUBLICATION_REFERENCE 
-	    OT_STUDY_ID 
-	    OT_STUDY_LABEL 
-	    OT_STUDY_LAST_EDITOR 
-	    OT_STUDY_MODIFIED 
-	    OT_STUDY_UPLOADED 
-	    OT_STUDY_PUBLICATION
-	    OT_TAG 
-	    OT_TREEBASE_ID 
-	    OT_TREEBASE_OTU_ID 
-	    OT_TREE_LAST_EDITED
-	    OT_TREE_MODIFIED 
-	    OT_YEAR
-	 */
-		
-	};
-	
-	/**
-	 * Properties to be indexed exactly under the defined property name.
-	 */
-	public static final SearchableProperty[] SOURCE_PROPERTIES_FOR_SIMPLE_INDEXING = {
-		SearchableProperty.CURATOR_NAME,
-		SearchableProperty.DATA_DEPOSIT,
-		SearchableProperty.PUBLICATION_REFERENCE,
-		SearchableProperty.STUDY_ID,
-		SearchableProperty.STUDY_PUBLICATION,
-		SearchableProperty.YEAR,
-		SearchableProperty.TAG_SOURCE
-		
-		/* TODO: add to SearchableProperty enum to enable searching these
-		OT_AGE
-		OT_AGE_MIN 
-		OT_AGE_MAX 
-		OT_AUTHOR_CONTRIBUTED 
-		OT_BRANCH_LENGTH_DESCRIPTION 
-		OT_BRANCH_LENGTH_MODE
-		OT_NODE_LABEL 
-		OT_NODE_LABEL_DESCRIPTION 
-		OT_NODE_LABEL_MODE 
-		OT_COMMENT 
-		OT_CURATOR_NAME
-		OT_DATA_DEPOSIT
-		OT_FOCAL_CLADE 
-		OT_INFERENCE_METHOD 
-		OT_INGROUP_CLADE
-		OT_IS_INGROUP 
-		OT_IS_OTU 
-		OT_ORIGINAL_LABEL 
-		OT_OTT_ID 
-		OT_OTT_TAXON_NAME 
-		OT_PARENT 
-	    OT_PUBLICATION_REFERENCE 
-	    OT_STUDY_ID 
-	    OT_STUDY_LABEL 
-	    OT_STUDY_LAST_EDITOR 
-	    OT_STUDY_MODIFIED 
-	    OT_STUDY_UPLOADED 
-	    OT_STUDY_PUBLICATION
-	    OT_TAG 
-	    OT_TREEBASE_ID 
-	    OT_TREEBASE_OTU_ID 
-	    OT_TREE_LAST_EDITED
-	    OT_TREE_MODIFIED 
-	    OT_YEAR
-	 */
 
+	/*
+	 * Properties to be indexed exactly under the defined property name (there may be others that we
+	 * index in other ways, see StudyIndexer for examples).
+	 *
+	public static final IndexProperties[] TREE_NODE_PROPERTIES_FOR_SIMPLE_INDEXING = {
+		SearchablePropertyForTreeNodes.ORIGINAL_LABEL,
+		SearchablePropertyForTreeNodes.MAPPED_OTT_TAXON_NAME,
+		SearchablePropertyForTreeNodes.MAPPED_OTT_ID,
+		
+		/* TODO: add to SearchableProperty enum to enable searching these
+		OT_AGE
+		OT_AGE_MIN 
+		OT_AGE_MAX 
+		OT_AUTHOR_CONTRIBUTED 
+		OT_BRANCH_LENGTH_DESCRIPTION 
+		OT_BRANCH_LENGTH_MODE
+		OT_NODE_LABEL 
+		OT_NODE_LABEL_DESCRIPTION 
+		OT_NODE_LABEL_MODE 
+		OT_COMMENT 
+		OT_CURATOR_NAME
+		OT_DATA_DEPOSIT
+		OT_FOCAL_CLADE 
+		OT_INFERENCE_METHOD 
+		OT_INGROUP_CLADE
+		OT_IS_INGROUP 
+		OT_IS_OTU 
+		OT_ORIGINAL_LABEL 
+		OT_OTT_ID 
+		OT_OTT_TAXON_NAME 
+		OT_PARENT 
+	    OT_PUBLICATION_REFERENCE 
+	    OT_STUDY_ID 
+	    OT_STUDY_LABEL 
+	    OT_STUDY_LAST_EDITOR 
+	    OT_STUDY_MODIFIED 
+	    OT_STUDY_UPLOADED 
+	    OT_STUDY_PUBLICATION
+	    OT_TAG 
+	    OT_TREEBASE_ID 
+	    OT_TREEBASE_OTU_ID 
+	    OT_TREE_LAST_EDITED
+	    OT_TREE_MODIFIED 
+	    OT_YEAR
+	 *
+		
 	};
+	
+	/*
+	 * Properties to be indexed exactly under the defined property name (there may be others that we
+	 * index in other ways, see StudyIndexer for examples).
+	 *
+	public static final IndexProperties[] TREE_PROPERTIES_FOR_SIMPLE_INDEXING = {
+		SearchablePropertyForTrees.BRANCH_LENGTH_MODE,
+		SearchablePropertyForTrees.TAG
+		
+		/* TODO: add to SearchableProperty enum to enable searching these
+		OT_AGE
+		OT_AGE_MIN 
+		OT_AGE_MAX 
+		OT_AUTHOR_CONTRIBUTED 
+		OT_BRANCH_LENGTH_DESCRIPTION 
+		OT_BRANCH_LENGTH_MODE
+		OT_NODE_LABEL 
+		OT_NODE_LABEL_DESCRIPTION 
+		OT_NODE_LABEL_MODE 
+		OT_COMMENT 
+		OT_CURATOR_NAME
+		OT_DATA_DEPOSIT
+		OT_FOCAL_CLADE 
+		OT_INFERENCE_METHOD 
+		OT_INGROUP_CLADE
+		OT_IS_INGROUP 
+		OT_IS_OTU 
+		OT_ORIGINAL_LABEL 
+		OT_OTT_ID 
+		OT_OTT_TAXON_NAME 
+		OT_PARENT 
+	    OT_PUBLICATION_REFERENCE 
+	    OT_STUDY_ID 
+	    OT_STUDY_LABEL 
+	    OT_STUDY_LAST_EDITOR 
+	    OT_STUDY_MODIFIED 
+	    OT_STUDY_UPLOADED 
+	    OT_STUDY_PUBLICATION
+	    OT_TAG 
+	    OT_TREEBASE_ID 
+	    OT_TREEBASE_OTU_ID 
+	    OT_TREE_LAST_EDITED
+	    OT_TREE_MODIFIED 
+	    OT_YEAR
+	 *
+		
+	};
+	
+	/**
+	 * Properties to be indexed exactly under the defined property name (there may be others that we
+	 * index in other ways, see StudyIndexer for examples).
+	 *
+	public static final IndexProperties[] STUDY_PROPERTIES_FOR_SIMPLE_INDEXING = {
+		SearchablePropertyForStudies.CURATOR_NAME,
+		SearchablePropertyForStudies.DATA_DEPOSIT,
+		SearchablePropertyForStudies.PUBLICATION_REFERENCE,
+		SearchablePropertyForStudies.STUDY_ID,
+		SearchablePropertyForStudies.STUDY_PUBLICATION,
+		SearchablePropertyForStudies.YEAR,
+		SearchablePropertyForStudies.TAG
+		
+		/* TODO: add to SearchableProperty enum to enable searching these
+		OT_AGE
+		OT_AGE_MIN 
+		OT_AGE_MAX 
+		OT_AUTHOR_CONTRIBUTED 
+		OT_BRANCH_LENGTH_DESCRIPTION 
+		OT_BRANCH_LENGTH_MODE
+		OT_NODE_LABEL 
+		OT_NODE_LABEL_DESCRIPTION 
+		OT_NODE_LABEL_MODE 
+		OT_COMMENT 
+		OT_CURATOR_NAME
+		OT_DATA_DEPOSIT
+		OT_FOCAL_CLADE 
+		OT_INFERENCE_METHOD 
+		OT_INGROUP_CLADE
+		OT_IS_INGROUP 
+		OT_IS_OTU 
+		OT_ORIGINAL_LABEL 
+		OT_OTT_ID 
+		OT_OTT_TAXON_NAME 
+		OT_PARENT 
+	    OT_PUBLICATION_REFERENCE 
+	    OT_STUDY_ID 
+	    OT_STUDY_LABEL 
+	    OT_STUDY_LAST_EDITOR 
+	    OT_STUDY_MODIFIED 
+	    OT_STUDY_UPLOADED 
+	    OT_STUDY_PUBLICATION
+	    OT_TAG 
+	    OT_TREEBASE_ID 
+	    OT_TREEBASE_OTU_ID 
+	    OT_TREE_LAST_EDITED
+	    OT_TREE_MODIFIED 
+	    OT_YEAR
+	 *
+
+	}; */
 	
 	// We just use the enum to hold arbitrary constant variables as above, so no need to set a generalized structure.
 	OTIConstants() {}

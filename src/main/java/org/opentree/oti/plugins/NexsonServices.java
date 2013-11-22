@@ -9,7 +9,7 @@ import org.opentree.exceptions.TreeNotFoundException;
 import org.opentree.oti.QueryRunner;
 
 /**
- * Other services.
+ * Space for other services, such as getting information about nexson properties, etc. Currently not necessary.
  * @author cody
  *
  */

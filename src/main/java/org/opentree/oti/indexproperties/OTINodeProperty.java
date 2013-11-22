@@ -1,4 +1,4 @@
-package org.opentree.oti.constants;
+package org.opentree.oti.indexproperties;
 
 import org.opentree.properties.OTPropertyPredicate;
 
@@ -53,10 +53,17 @@ public enum OTINodeProperty implements OTPropertyPredicate {
 	// ===== tree root nodes
 
 	/**
-	 * A primitive string array containing all the original taxon names applied to tip children of a given tree node.
+	 * A primitive string array containing all the original tip labels applied to tip children of a given tree node.
 	 * This is stored as a property of the root of each imported tree.
 	 */
-	DESCENDANT_ORIGINAL_TAXON_NAMES ("tip_original_names", String[].class),
+	DESCENDANT_ORIGINAL_TIP_LABELS ("tip_original_labels", String[].class),
+	
+	/*
+	 * A primitive string array containing all the original tip labels applied to tip children of a given tree node,
+	 * with whitespace replaced by OTIConstants.WHITESPACE_SUBSTITUTE_FOR_SEARCH. This is stored as a property of the root of
+	 * each imported tree.
+	 *
+	DESCENDANT_ORIGINAL_TIP_LABELS_WHITESPACE_FILLED ("tip_original_labels_no_spaces", String[].class), */
 	
 	/**
 	 * A primitive string array containing all the currently mapped taxon names applied to tip children of a given tree node.
@@ -64,12 +71,12 @@ public enum OTINodeProperty implements OTPropertyPredicate {
 	 */
 	DESCENDANT_MAPPED_TAXON_NAMES ("tip_mapped_names", String[].class),
 
-	/**
+	/*
 	 * A primitive string array containing all the currently mapped taxon names applied to tip children of a given tree node,
 	 * with whitespace replaced by OTIConstants.WHITESPACE_SUBSTITUTE_FOR_SEARCH. This is stored as a property of the root of
 	 * each imported tree.
-	 */
-	DESCENDANT_MAPPED_TAXON_NAMES_WHITESPACE_FILLED ("tip_mapped_names_no_spaces", String[].class),
+	 *
+	DESCENDANT_MAPPED_TAXON_NAMES_WHITESPACE_FILLED ("tip_mapped_names_no_spaces", String[].class), */
 	
 	/**
 	 * A primitive string array containing all the ott ids for taxa mapped to the tip children of a given tree node.
@@ -134,10 +141,25 @@ public enum OTINodeProperty implements OTPropertyPredicate {
 	 */
 	NEXSON_ID ("nexson_id", String.class),
 
+	/*
+	 * The original label, with spaces replaced by the value of OTIConstants.WHITESPACE_SUBSTITUTE_FOR_SEARCH
+	 *
+	OT_ORIGINAL_LABEL_NO_SPACES ("original_label_no_spaces", String.class),
+
 	/**
+	 * The current mapped taxon name, with spaces replaced by the value of OTIConstants.WHITESPACE_SUBSTITUTE_FOR_SEARCH
+	 *
+	OT_MAPPED_TAXON_NAME_NO_SPACES ("mapped_taxon_name_no_spaces", String.class),
+
+	/* 
 	 * An id property used by phylografter. We assign these values to incoming trees, and also hide these properties when returning metadata.
-	 */
+	 *
+
+	 * DEPRECATED in favor of NEXSON_ID
+
 	PHYLOGRAFTER_ID ("phylografter_id", long.class),
+	
+	*/
 	
 	/**
 	 * A flag specifying that the clade represented by the node is the ingroup for the tree. Is only set on the root node

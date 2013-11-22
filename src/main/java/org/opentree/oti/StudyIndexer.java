@@ -1,10 +1,14 @@
 package org.opentree.oti;
 
 import org.opentree.graphdb.GraphDatabaseAgent;
+import org.opentree.graphdb.NodeIndexDescription;
 import org.opentree.oti.constants.OTIConstants;
-import org.opentree.oti.constants.OTINodeProperty;
 import org.opentree.oti.constants.OTIRelType;
-import org.opentree.oti.constants.SearchableProperty;
+import org.opentree.oti.indexproperties.IndexedArrayProperties;
+import org.opentree.oti.indexproperties.IndexedPrimitiveProperties;
+import org.opentree.oti.indexproperties.OTINodeProperty;
+import org.opentree.oti.indexproperties.OTPropertyArray;
+import org.opentree.properties.OTPropertyPredicate;
 import org.opentree.properties.OTVocabularyPredicate;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -13,20 +17,14 @@ import org.neo4j.graphdb.index.Index;
 
 public class StudyIndexer extends OTIDatabase {
 
-	// tree root indexes
-	public final Index<Node> treeRootNodesByTreeIdOrStudyId = getNodeIndex(OTINodeIndex.TREE_ROOT_NODES_BY_TREE_ID_OR_STUDY_ID);
-	public final Index<Node> treeRootNodesByOTProperty = getNodeIndex(OTINodeIndex.TREE_ROOT_NODES_BY_OT_PROPERTY);
-	
-	public final Index<Node> treeRootNodesByOriginalTaxonName = getNodeIndex(OTINodeIndex.TREE_ROOT_NODES_BY_ORIGINAL_TAXON_NAME);
-	public final Index<Node> treeRootNodesByMappedTaxonName = getNodeIndex(OTINodeIndex.TREE_ROOT_NODES_BY_MAPPED_TAXON_NAME);
-	public final Index<Node> treeRootNodesByMappedTaxonNameNoSpaces = getNodeIndex(OTINodeIndex.TREE_ROOT_NODES_BY_MAPPED_TAXON_NAME_WHITESPACE_FILLED);
-	public final Index<Node> treeRootNodesByMappedTaxonOTTId = getNodeIndex(OTINodeIndex.TREE_ROOT_NODES_BY_MAPPED_TAXON_OTT_ID);
-
-	// source meta indexes
-	public final Index<Node> studyMetaNodesByOTProperty = getNodeIndex(OTINodeIndex.STUDY_METADATA_NODES_BY_OT_PROPERTY);
-	
-	// TODO: make tree node indexes
-	
+	// property indexes
+	public final Index<Node> studyMetaNodesByPropertyExact = getNodeIndex(OTINodeIndex.STUDY_METADATA_NODES_BY_PROPERTY_EXACT);
+	public final Index<Node> studyMetaNodesByPropertyFulltext = getNodeIndex(OTINodeIndex.STUDY_METADATA_NODES_BY_PROPERTY_FULLTEXT);
+	public final Index<Node> treeRootNodesByPropertyExact = getNodeIndex(OTINodeIndex.TREE_ROOT_NODES_BY_PROPERTY_EXACT);
+	public final Index<Node> treeRootNodesByPropertyFulltext = getNodeIndex(OTINodeIndex.TREE_ROOT_NODES_BY_PROPERTY_FULLTEXT);
+	public final Index<Node> treeNodesByPropertyExact = getNodeIndex(OTINodeIndex.TREE_NODES_BY_PROPERTY_EXACT);
+	public final Index<Node> treeNodesByPropertyFulltext = getNodeIndex(OTINodeIndex.TREE_NODES_BY_PROPERTY_FULLTEXT);
+		
 	// ===== constructors
 	
 	public StudyIndexer(GraphDatabaseAgent gdba) {
@@ -48,17 +46,18 @@ public class StudyIndexer extends OTIDatabase {
 	 * @param property
 	 */
 	public void addStudyMetaNodeToIndexes(Node studyMetaNode) {
-//		studyMetaNodesByOTProperty.add(studyMetaNode, OTVocabularyPredicate.OT_STUDY_ID.propertyName(),
-//				studyMetaNode.getProperty(OTVocabularyPredicate.OT_STUDY_ID.propertyName()));
-		indexNodeBySearchableProperties(studyMetaNode, OTIConstants.SOURCE_PROPERTIES_FOR_SIMPLE_INDEXING);
+		indexNodeBySimpleProperties(studyMetaNode, IndexedPrimitiveProperties.STUDIES_EXACT);
+		indexNodeBySimpleProperties(studyMetaNode, IndexedPrimitiveProperties.STUDIES_FULLTEXT);
+		indexNodeByArrayProperties(studyMetaNode, IndexedArrayProperties.STUDIES_EXACT);
+		indexNodeByArrayProperties(studyMetaNode, IndexedArrayProperties.STUDIES_FULLTEXT);
 	}
 
 	/**
 	 * Remove the indicated node from all source metadata node indexes.
 	 */
 	public void removeStudyMetaNodeFromIndexes(Node studyMetaNode) {
-//		studyMetaNodesByOTProperty.remove(sourceMetaNode);
-		studyMetaNodesByOTProperty.remove(studyMetaNode);
+		studyMetaNodesByPropertyExact.remove(studyMetaNode);
+		studyMetaNodesByPropertyFulltext.remove(studyMetaNode);
 	}
 		
 	// ===== indexing tree root nodes
@@ -71,88 +70,127 @@ public class StudyIndexer extends OTIDatabase {
 	 */
 	public void addTreeRootNodeToIndexes(Node treeRootNode) {
 
-		treeRootNodesByTreeIdOrStudyId.add(treeRootNode, OTINodeProperty.TREE_ID.propertyName(),
-				treeRootNode.getProperty(OTINodeProperty.TREE_ID.propertyName()));
+		/*
+
+		TODO: check to make sure trees are getting indexed by ot:studyId
 		
-		treeRootNodesByTreeIdOrStudyId.add(treeRootNode, OTVocabularyPredicate.OT_STUDY_ID.propertyName(),
+		treeRootNodesByTreeOrStudyId.add(treeRootNode, OTVocabularyPredicate.OT_STUDY_ID.propertyName(),
 				treeRootNode.getSingleRelationship(OTIRelType.METADATAFOR, Direction.INCOMING)
 					.getEndNode().getProperty(OTVocabularyPredicate.OT_STUDY_ID.propertyName()));
+		*/
 		
-		// add to property indexes
-		indexNodeBySearchableProperties(treeRootNode, OTIConstants.TREE_PROPERTIES_FOR_SIMPLE_INDEXING);
-
-		// add to taxonomy indexes
-		addTreeToTaxonomicIndexes(treeRootNode);
+		indexNodeBySimpleProperties(treeRootNode, IndexedPrimitiveProperties.TREES_EXACT);
+		indexNodeBySimpleProperties(treeRootNode, IndexedPrimitiveProperties.TREES_FULLTEXT);
+		indexNodeByArrayProperties(treeRootNode, IndexedArrayProperties.TREES_EXACT);
+		indexNodeByArrayProperties(treeRootNode, IndexedArrayProperties.TREES_FULLTEXT);
 	}
-	
+
 	/**
 	 * Remove the indicated node from the tree root node indexes.
 	 *
 	 * @param treeRootNode
 	 */
 	public void removeTreeRootNodeFromIndexes(Node treeRootNode) {
-		treeRootNodesByTreeIdOrStudyId.remove(treeRootNode);
-//		treeRootNodesBySourceId.remove(treeRootNode);
-		treeRootNodesByOTProperty.remove(treeRootNode);
-		treeRootNodesByMappedTaxonName.remove(treeRootNode);
-		treeRootNodesByMappedTaxonNameNoSpaces.remove(treeRootNode);
-		treeRootNodesByMappedTaxonOTTId.remove(treeRootNode);
+		treeRootNodesByPropertyExact.remove(treeRootNode);
+		treeRootNodesByPropertyFulltext.remove(treeRootNode);
 	}
 	
-	// === private methods used during tree root indexing
+	// ===== indexing tree nodes
 	
 	/**
-	 * Add the tree to the taxonomic indexes
-	 * @param treeRootNode
+	 * Install the indicated tree node into the indexes. Uses node properties set during study
+	 * import, and thus should be called *after* the study has been added to the graph.
+	 * 
+	 * @param treeNode
 	 */
-	private void addTreeToTaxonomicIndexes(Node root) {
-		
-		addStringArrayEntriesToIndex(root,
-				treeRootNodesByOriginalTaxonName,
-				OTINodeProperty.DESCENDANT_ORIGINAL_TAXON_NAMES.propertyName(),
-				OTVocabularyPredicate.OT_ORIGINAL_LABEL.propertyName());
-
-		addStringArrayEntriesToIndex(root,
-				treeRootNodesByMappedTaxonName,
-				OTINodeProperty.DESCENDANT_MAPPED_TAXON_NAMES.propertyName(),
-				OTVocabularyPredicate.OT_OTT_TAXON_NAME.propertyName());
-		
-		addStringArrayEntriesToIndex(root,
-				treeRootNodesByMappedTaxonNameNoSpaces,
-				OTINodeProperty.DESCENDANT_MAPPED_TAXON_NAMES_WHITESPACE_FILLED.propertyName(),
-				OTVocabularyPredicate.OT_OTT_TAXON_NAME.propertyName());
-		
-		addLongArrayEntriesToIndex(root,
-				treeRootNodesByMappedTaxonOTTId,
-				OTINodeProperty.DESCENDANT_MAPPED_TAXON_OTT_IDS.propertyName(),
-				OTVocabularyPredicate.OT_OTT_ID.propertyName());
+	public void addTreeNodeToIndexes(Node treeNode) {
+		indexNodeBySimpleProperties(treeNode, IndexedPrimitiveProperties.TREE_NODES_EXACT);
+		indexNodeBySimpleProperties(treeNode, IndexedPrimitiveProperties.TREE_NODES_FULLTEXT);
+		indexNodeByArrayProperties(treeNode, IndexedArrayProperties.TREE_NODES_EXACT);
+		indexNodeByArrayProperties(treeNode, IndexedArrayProperties.TREE_NODES_FULLTEXT);
+	}
+	
+	/**
+	 * Remove the indicated node from the tree node indexes.
+	 *
+	 * @param treeNode
+	 */
+	public void removeTreeNodeFromIndexes(Node treeNode) {
+		treeNodesByPropertyExact.remove(treeNode);
+		treeNodesByPropertyFulltext.remove(treeNode);
 	}
 	
 	// ===== generalized private methods used during indexing
 
 	/**
-	 * Index a node into the supplied index under all the specified properties.
+	 * Index a node into the supplied index under each specified property and its value for the graph node.
 	 * @param node
 	 * @param index
 	 */
-	private void indexNodeBySearchableProperties(Node node, SearchableProperty[] searchablePoperties) {
-		for (SearchableProperty search : searchablePoperties) {
-			Index<Node> index = getNodeIndex(search.index);
-			if (node.hasProperty(search.property.propertyName())) {
-				index.add(node, search.property.propertyName(), node.getProperty(search.property.propertyName()));
-			}
+	private void indexNodeBySimpleProperties(Node node, IndexedPrimitiveProperties indexedProperties) {
+		for (OTPropertyPredicate property : indexedProperties.properties()) {
+			indexSingleProperty(getNodeIndex(indexedProperties.index()), node, property.propertyName());
 		}
 	}
 	
-	private void addStringArrayEntriesToIndex(Node node, Index<Node> index, String nodePropertyName, String indexProperty) {
-		if (node.hasProperty(nodePropertyName)) {
-			String[] array = (String[]) node.getProperty(nodePropertyName);
-			for (int i = 0; i < array.length; i++) {
-				index.add(node, indexProperty, array[i]);
+	/**
+	 * Index a node into the supplied index under each specified property and all the values in the array stored for that property on the graph node.
+	 * @param node
+	 * @param index
+	 */
+	private void indexNodeByArrayProperties(Node node, IndexedArrayProperties indexedProperties) {
+		for (OTPropertyArray property : indexedProperties.properties()) {
+			
+			Index<Node> index = getNodeIndex(indexedProperties.index());
+			String graphArrayPropertyLabel = property.graphProperty.propertyName();
+			String indexPropertyLabel = property.typeProperty.propertyName();
+			Class<?> type = property.typeProperty.type();
+			
+			if (type.equals(String.class)) {
+				addStringArrayEntriesToIndex(node, index, graphArrayPropertyLabel, indexPropertyLabel);
+
+			} else if (type.equals(Long.class)) {
+				addLongArrayEntriesToIndex(node, index, graphArrayPropertyLabel, indexPropertyLabel);
+				
 			}
 		}
 	}
 
+	/**
+	 * Index a node into the supplied index under the value of the specified property for that node.
+	 * @param index
+	 * @param node
+	 * @param property
+	 */
+	private void indexSingleProperty(Index<Node> index, Node node, String property) {
+		if (node.hasProperty(property)) {
+			index.add(node, property, node.getProperty(property));
+		}
+	}
+	
+	/**
+	 * Helper method
+	 * @param node
+	 * @param index
+	 * @param graphNodePropertyLabel
+	 * @param indexPropertyLabel
+	 */
+	private void addStringArrayEntriesToIndex(Node node, Index<Node> index, String graphNodePropertyLabel, String indexPropertyLabel) {
+		if (node.hasProperty(graphNodePropertyLabel)) {
+			String[] array = (String[]) node.getProperty(graphNodePropertyLabel);
+			for (int i = 0; i < array.length; i++) {
+				index.add(node, indexPropertyLabel, array[i]);
+			}
+		}
+	}
+
+	/**
+	 * Helper method
+	 * @param node
+	 * @param index
+	 * @param graphNodePropertyLabel
+	 * @param indexPropertyLabel
+	 */
 	private void addLongArrayEntriesToIndex(Node node, Index<Node> index, String nodePropertyName, String indexProperty) {
 		if (node.hasProperty(nodePropertyName)) {
 			long[] array = (long[]) node.getProperty(nodePropertyName);

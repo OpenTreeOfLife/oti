@@ -30,8 +30,7 @@ import org.opentree.nexson.io.NexsonReader;
 import org.opentree.nexson.io.NexsonSource;
 import org.opentree.oti.QueryRunner;
 import org.opentree.oti.DatabaseManager;
-import org.opentree.oti.constants.SearchableProperty;
-//import org.opentree.otu.exceptions.DuplicateSourceException;
+import org.opentree.oti.indexproperties.IndexedPrimitiveProperties;
 
 /**
  * services for indexing. very preliminary, should probably be reorganized (later).
@@ -41,10 +40,14 @@ import org.opentree.oti.constants.SearchableProperty;
  */
 public class IndexServices extends ServerPlugin {
 
-	private String nexsonCommitsURLStr = "https://bitbucket.org/api/2.0/repositories/blackrim/avatol_nexsons/commits";
-	private String nexsonsBaseURL = "https://bitbucket.org/api/1.0/repositories/blackrim/avatol_nexsons/raw/";
+//	private String nexsonCommitsURLStr = "https://bitbucket.org/api/2.0/repositories/blackrim/avatol_nexsons/commits";
+//	private String nexsonsBaseURL = "https://bitbucket.org/api/1.0/repositories/blackrim/avatol_nexsons/raw/";
 
-	/**
+//	private String nexsonCommitsURLStr = "https://api.github.com/repos/OpenTreeOfLife/treenexus/commits";
+//	private String nexsonsBaseURL = "https://bitbucket.org/api/1.0/repositories/blackrim/avatol_nexsons/raw/";
+
+	
+	/*
 	 * Return the url of the most recent commit in the public repo. Facilitates working with these independently in javascript.
 	 * 
 	 * @param graphDb
@@ -52,7 +55,7 @@ public class IndexServices extends ServerPlugin {
 	 * @throws InterruptedException
 	 * @throws IOException
 	 * @throws ParseException
-	 */
+	 *
 	@Description("Return the url of the most recent commit in the public repo")
 	@PluginTarget(GraphDatabaseService.class)
 	public Representation getMostCurrentNexsonsURL(@Source GraphDatabaseService graphDb) throws InterruptedException, IOException, ParseException {
@@ -61,22 +64,23 @@ public class IndexServices extends ServerPlugin {
 
 		// get the commits from the public repo
 		BufferedReader nexsonCommits = new BufferedReader(new InputStreamReader(new URL(nexsonCommitsURLStr).openStream()));
-		JSONObject commitsJSON = (JSONObject) parser.parse(nexsonCommits);
+		JSONArray commitsJSON = (JSONArray) parser.parse(nexsonCommits);
 
 		// get just the most recent commit
-		String mostRecentCommitHash = (String) ((JSONObject) ((JSONArray) commitsJSON.get("values")).get(0)).get("hash");
+//		String mostRecentCommitHash = (String) ((JSONObject) commitsJSON.get(0)).get("sha");
+		String mostRecentCommitURL = (String) ((JSONObject) commitsJSON.get(0)).get("url");
 
 		Map<String, Object> result = new HashMap<String, Object>();
-		result.put("base_url", nexsonsBaseURL);
-		result.put("recenthash", mostRecentCommitHash);
-		result.put("url", nexsonsBaseURL + mostRecentCommitHash + "/");
+//		result.put("base_url", nexsonsBaseURL);
+//		result.put("recenthash", mostRecentCommitHash);
+		result.put("url", mostRecentCommitURL);
 		return OTRepresentationConverter.convert(result);
 
 //		return ValueRepresentation.string(nexsonsBaseURL + mostRecentCommitHash + "/");
 
-	}
+	} */
 
-	/**
+	/*
 	 * Get a list of the nexson files in the public repo commit at the specified url
 	 * 
 	 * @param graphDb
@@ -85,7 +89,7 @@ public class IndexServices extends ServerPlugin {
 	 * @throws InterruptedException
 	 * @throws IOException
 	 * @throws ParseException
-	 */
+	 *
 	@Description("Get a list of the nexsons currently in the public nexsons repo")
 	@PluginTarget(GraphDatabaseService.class)
 	public Representation getNexsonsListFromURL(@Source GraphDatabaseService graphDb, @Description("remote nexson url") @Parameter(name = "url", optional = false) String url) throws IOException {
@@ -109,7 +113,7 @@ public class IndexServices extends ServerPlugin {
 		}
 
 		return ListRepresentation.string(availableStudies);
-	}
+	} */
 
 	/**
 	 * Just index a single remote nexson into the local db.
@@ -126,60 +130,19 @@ public class IndexServices extends ServerPlugin {
 			+ "source is added, or false if it has no trees. Trees that cannot be read from nexson files that otherwise contain some good trees will be skipped.")
 	@PluginTarget(GraphDatabaseService.class)
 	public Representation indexSingleNexson(@Source GraphDatabaseService graphDb,
-			@Description("remote nexson url") @Parameter(name = "url", optional = false) String url,
+			@Description("remote nexson url") @Parameter(name = "url", optional = false) String url /*,
 			@Description("source id under which this source will be indexed locally")
-				@Parameter(name = "sourceId", optional = false) String sourceId) throws MalformedURLException, IOException {
+				@Parameter(name = "sourceId", optional = false) String sourceId */ ) throws MalformedURLException, IOException {
 
-		DatabaseManager dm = new DatabaseManager(graphDb);
-		NexsonSource source = readRemoteNexson(url, sourceId);
+		DatabaseManager manager = new DatabaseManager(graphDb);
+		NexsonSource study = readRemoteNexson(url);
 
-		if (source.getTrees().iterator().hasNext() == false) {
+		if (study.getTrees().iterator().hasNext() == false) {
 			return ValueRepresentation.bool(false);
 		} else {
-			dm.addSource(source, "remote", true);
+			manager.addOrReplaceStudy(study);
 			return ValueRepresentation.bool(true);
 		} 
-	}
-	
-	/**
-	 * Return a map containing available property names and the names of the SearchableProperty enum elements they
-	 * correspond to.
-	 * 
-	 * @param graphDb
-	 * @return
-	 */
-	@Description("Get a list of properties that can be searched")
-	@PluginTarget(GraphDatabaseService.class)
-	public Representation getSearchableProperties (@Source GraphDatabaseService graphDb) {
-
-		HashMap<String,String> properties = new HashMap<String,String>();
-		for (SearchableProperty sp : SearchableProperty.values()) {
-			properties.put(sp.shortName, sp.name());
-		}
-		
-		return OTRepresentationConverter.getMapRepresentation(properties);
-	}
-
-	/**
-	 * Perform a basic search on the stored indexes
-	 * @param graphDb
-	 * @param propertyName
-	 * @param value
-	 * @return
-	 */
-	@Description("Perform a basic search on the stored indexes") // TODO: move to query runner
-	@PluginTarget(GraphDatabaseService.class)
-	public Representation search(@Source GraphDatabaseService graphDb,
-			@Description("The property to be searched on. A list of searchable properties is available from the getSearchableProperties service.")
-				@Parameter(name = "property", optional = false) String property,
-			@Description("The value to be searched. This must be passed as a string, but will be converted to the datatype corresponding to the "
-					+ "specified searchable value.") @Parameter(name = "value", optional = false) String value) {
-		
-		QueryRunner browser = new QueryRunner(graphDb);
-		SearchableProperty searchProperty = SearchableProperty.valueOf(property);
-//		return ListRepresentation.string(browser.doBasicSearch(searchProperty, value));
-		
-		return OTRepresentationConverter.convert("not implemented");
 	}
 
 	/**
@@ -190,11 +153,11 @@ public class IndexServices extends ServerPlugin {
 	 * @throws MalformedURLException
 	 * @throws IOException
 	 */
-	private NexsonSource readRemoteNexson(String url, String sourceId) throws MalformedURLException, IOException {
+	private NexsonSource readRemoteNexson(String url) throws MalformedURLException, IOException {
 		BufferedReader nexson = new BufferedReader(new InputStreamReader(new URL(url).openStream()));
 		MessageLogger msgLogger = new MessageLogger("");
 
 		// TODO: sometimes this returns a null for the first tree, but no errors. Why? Why don't we get an error?
-		return NexsonReader.readNexson(nexson, sourceId, false, msgLogger);
+		return NexsonReader.readNexson(nexson, false, msgLogger);
 	}
 }

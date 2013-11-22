@@ -20,8 +20,9 @@ import org.opentree.graphdb.GraphDatabaseAgent;
 import org.opentree.nexson.io.NexsonSource;
 import org.opentree.oti.constants.OTIConstants;
 import org.opentree.oti.constants.OTIGraphProperty;
-import org.opentree.oti.constants.OTINodeProperty;
 import org.opentree.oti.constants.OTIRelType;
+import org.opentree.oti.indexproperties.IndexedPrimitiveProperties;
+import org.opentree.oti.indexproperties.OTINodeProperty;
 import org.opentree.properties.BasicType;
 import org.opentree.properties.OTVocabularyPredicate;
 import org.neo4j.graphdb.Direction;
@@ -38,24 +39,19 @@ import org.neo4j.kernel.Traversal;
 public class DatabaseManager extends OTIDatabase {
 
 	private StudyIndexer indexer;
-//	private ConfigurationManager config;
-	private QueryRunner queryRunner;
-	
-	private HashSet<String> knownRemotes;
 	private Node lastObservedIngroupStartNode = null;
 	
 	// used when copying trees to remember a specified node from the old tree that is in the new one
 	Node workingCopyNodeOfInterest = null;
 
 	// used when storing taxon information to use when for indexing tree root nodes
-	List<String> originalTaxonNames;
+	List<String> originalTipLabels;
+	List<String> originalTipLabelsNoSpaces;
 	List<String> mappedTaxonNames;
 	List<String> mappedTaxonNamesNoSpaces;
 	List<Long> mappedOTTIds;
 	
-//	protected Index<Node> sourceMetaNodesBySourceId = getNodeIndex(OTINodeIndex.STUDY_METADATA_NODES_BY_STUDY_ID);
-	protected Index<Node> studyMetaNodesByOTProperty = getNodeIndex(OTINodeIndex.STUDY_METADATA_NODES_BY_OT_PROPERTY);
-	protected Index<Node> treeRootNodesByTreeId = getNodeIndex(OTINodeIndex.TREE_ROOT_NODES_BY_TREE_ID_OR_STUDY_ID);
+	protected Index<Node> studyMetaNodesByProperty = getNodeIndex(OTINodeIndex.STUDY_METADATA_NODES_BY_PROPERTY_EXACT);
 	
 	// this is a taxomachine index, so we specify index type parameters to override the OTU default behavior of opening indexes as fulltext
 	protected Index<Node> taxonNodesByOTTId = getNodeIndex(TaxonomyNodeIndex.TAXON_BY_OTT_ID, IndexManager.PROVIDER, "lucene", "type", "exact");
@@ -70,9 +66,6 @@ public class DatabaseManager extends OTIDatabase {
 	public DatabaseManager(GraphDatabaseService graphService) {
 		super(graphService);
 		indexer = new StudyIndexer(graphDb);
-//		config = new ConfigurationManager(graphDb);
-		queryRunner = new QueryRunner(graphDb);
-//		updateKnownRemotesInternal();
 	}
 
 	/**
@@ -83,9 +76,6 @@ public class DatabaseManager extends OTIDatabase {
 	public DatabaseManager(EmbeddedGraphDatabase embeddedGraph) {
 		super(embeddedGraph);
 		indexer = new StudyIndexer(graphDb);
-//		config = new ConfigurationManager(graphDb);
-		queryRunner = new QueryRunner(graphDb);
-//		updateKnownRemotesInternal();
 	}
 
 	/**
@@ -96,9 +86,6 @@ public class DatabaseManager extends OTIDatabase {
 	public DatabaseManager(GraphDatabaseAgent gdb) {
 		super(gdb);
 		indexer = new StudyIndexer(graphDb);
-//		config = new ConfigurationManager(graphDb);
-		queryRunner = new QueryRunner(graphDb);
-//		updateKnownRemotesInternal();
 	}
 
 	// ========== public methods
@@ -108,42 +95,14 @@ public class DatabaseManager extends OTIDatabase {
 	/**
 	 * Install a study into the db, including loading all included trees.
 	 * 
-	 * @param source
-	 * 		A NexsonSource object that contains the source metadata and trees
-	 * 
-	 * @param location
-	 * 		Used to indicate remote vs local studies. To recognize a study as local, pass the location
-	 * 		string in DatabaseManager.LOCAL_LOCATION. Using any other value for the location will result in this study
-	 * 		being treated as a remote study.
-	 * 
-	 * @return
-	 * 		The source metadata node for the newly added study
-	 * @throws DuplicateSourceException 
-	 */
-	public Node addSource(NexsonSource source, String location) {
-		return addSource(source, location, false);
-	}
-	
-	/**
-	 * Install a study into the db, including loading all included trees.
-	 * 
 	 * @param study
 	 * 		A NexsonSource object that contains the source metadata and trees.
 	 * 
-	 * @param location
-	 * 		Used to indicate remote vs local studies. To recognize a study as local, pass the location
-	 * 		string in DatabaseManager.LOCAL_LOCATION. Using any other value for the location will result in this study
-	 * 		being treated as a remote study.
-	 * 
-	 * @param overwrite
-	 * 		Pass a value of true to cause any preexisting studies with this location and source id to be deleted and replaced
-	 * 		by this source. Otherwise the method will throw an exception if there are preexisting studies.
-	 * 
 	 * @return
 	 * 		The source metadata node for the newly added study
-	 * @throws DuplicateSourceException 
+	 * 
 	 */
-	public Node addSource(NexsonSource study, String location, boolean overwrite) {
+	public Node addOrReplaceStudy(NexsonSource study) {
 		
 		// TODO: return meaningful information about the result to the rest query that calls this method
 
@@ -155,7 +114,7 @@ public class DatabaseManager extends OTIDatabase {
 			String studyId = study.getId();
 
 			// an attempt to add a study with the same id as an existing study overwrites the existing study
-			studyMeta = DatabaseUtils.getSingleNodeIndexHit(studyMetaNodesByOTProperty, OTVocabularyPredicate.OT_STUDY_ID.propertyName(), studyId);
+			studyMeta = DatabaseUtils.getSingleNodeIndexHit(studyMetaNodesByProperty, OTVocabularyPredicate.OT_STUDY_ID.propertyName(), studyId);
 			if (studyMeta != null) {
 				deleteSource(studyMeta);
 			}
@@ -169,7 +128,6 @@ public class DatabaseManager extends OTIDatabase {
 
 			// add the trees
 			boolean noValidTrees = true;
-			int i = 0;
 			Iterator<JadeTree> treesIter = study.getTrees().iterator();
 			while (treesIter.hasNext()) {
 
@@ -185,37 +143,14 @@ public class DatabaseManager extends OTIDatabase {
 
 				// get the tree id from the nexson
 				// TODO: verify that this is the property we want to be using for this
-				String treeId = (String) tree.getObject(OTINodeProperty.PHYLOGRAFTER_ID.propertyName());
+				String treeId = (String) tree.getObject(OTINodeProperty.NEXSON_ID.propertyName());
 				
 				// create a unique tree id by including the study id, this is the convention from treemachine
 				String treeUniqueId = studyId + "_" + treeId;
 
 				// add the tree
 				addTree(tree, treeUniqueId, studyMeta);
-
-				i++;
 			}
-			
-/*			if (location == LOCAL_LOCATION) { // if this is a local study then attach it to any existing remotes
-				for (Node sourceMetaHit : queryRunner.getRemoteSourceMetaNodesForSourceId(studyId)) {
-					if (sourceMetaHit.getProperty(OTINodeProperty.LOCATION.propertyName()).equals(LOCAL_LOCATION) == false) {
-						studyMeta.createRelationshipTo(sourceMetaHit, OTIRelType.LOCALCOPYOF);
-					}
-				}
-
-			} else { // remote study
-
-				// check if there is a local study to attach this remote one to
-				Node localSourceMeta = DatabaseUtils.getSingleNodeIndexHit(studyMetaNodesByOTProperty, LOCAL_LOCATION + OTUConstants.SOURCE_ID_SUFFIX, studyId);
-				if (localSourceMeta != null) {
-					localSourceMeta.createRelationshipTo(studyMeta, OTIRelType.LOCALCOPYOF);
-				}
-				
-				// add the remote location if necessary
-				if (!knownRemotes.contains(location)) {
-					addKnownRemote(location);
-				}
-			} */
 		
 			indexer.addStudyMetaNodeToIndexes(studyMeta);
 			
@@ -271,114 +206,7 @@ public class DatabaseManager extends OTIDatabase {
 		
 		return root;
 	}
-	
-	/*
-	 * Make a working copy of a local tree.
-	 * 
-	 * @param original
-	 * 		The root node of the tree to be copied
-	 * @return workingRootNode
-	 * 		The root node of the working copy of the tree
-	 *
-	public Map<String, Object> makeWorkingCopyOfTree(Node original, Long nodeIdOfInterest) {
-		
-		Node working = graphDb.createNode();
-		
-		// connect the working root to the original root
-		working.createRelationshipTo(original, OTIRelType.WORKINGCOPYOF);
-		working.setProperty(OTINodeProperty.IS_WORKING_COPY.propertyName(), true);
-		
-		// connect the working root to the source metadata node
-		Relationship originalSourceMetaRel = original.getSingleRelationship(OTIRelType.METADATAFOR, Direction.INCOMING);
-		Node sourceMeta = originalSourceMetaRel.getStartNode();
-		sourceMeta.createRelationshipTo(working, OTIRelType.METADATAFOR);
 
-		// copy the properties
-		DatabaseUtils.copyAllProperties(original, working);
-		working.removeProperty(OTINodeProperty.IS_SAVED_COPY.propertyName());
-
-		// copy the tree itself
-		copyTreeRecursive(original, working, nodeIdOfInterest);
-
-		// update indexes
-		indexer.removeTreeRootNodeFromIndexes(original);
-		indexer.addTreeRootNodeToIndexes(working);
-
-		// disconnect the original root from the source metadata node
-		originalSourceMetaRel.delete();
-		
-		Map<String, Object> result = new HashMap<String, Object>();
-		result.put("working_root_node_id", working.getId());
-		
-		if (nodeIdOfInterest != null) {
-			if (workingCopyNodeOfInterest != null) {
-				result.put("node_of_interest_new_id", workingCopyNodeOfInterest.getId());
-			} else {
-				result.put("node_of_interest_new_id", "null");
-			}
-		}
-		
-		workingCopyNodeOfInterest = null;
-		
-		return result;
-		
-	}
-	
-	/**
-	 * Throw away a working tree and restore the original copy
-	 * 
-	 * @param working
-	 * 		The root node of the working tree
-	 * @return
-	 * 		The root node of the original tree
-	 *
-	public Node discardWorkingCopy(Node working) {
-		
-		// get the source meta node
-		Relationship workingSourceMetaRel = working.getSingleRelationship(OTIRelType.METADATAFOR, Direction.INCOMING);
-		Node sourceMeta = workingSourceMetaRel.getStartNode();
-		
-		// reattach original root to the source meta and add it back to the indexes
-		Node original = working.getSingleRelationship(OTIRelType.WORKINGCOPYOF, Direction.OUTGOING).getEndNode();
-		sourceMeta.createRelationshipTo(original, OTIRelType.METADATAFOR);
-		indexer.addTreeRootNodeToIndexes(original);
-		
-		// detach the working root from the original and the source meta
-		working.getSingleRelationship(OTIRelType.METADATAFOR, Direction.INCOMING).delete();
-		working.getSingleRelationship(OTIRelType.WORKINGCOPYOF, Direction.OUTGOING).delete();
-
-		// delete the working tree for good
-		indexer.removeTreeRootNodeFromIndexes(working);
-		deleteTree(working);
-
-		return original;
-	}
-
-	/**
-	 * Replace a saved (i.e. original) tree with its working copy, and mark the newly saved (previously working) copy as saved.
-	 * 
-	 * @param working
-	 * 		The root node of the working tree copy to be saved
-	 * @return
-	 * 		The root node of the newly saved tree (same node as was passed in)
-	 *
-	public Node saveWorkingCopy(Node working) {
-
-		// get the original root node
-		Relationship workingCopyRel = working.getSingleRelationship(OTIRelType.WORKINGCOPYOF, Direction.OUTGOING);
-		Node original = workingCopyRel.getEndNode();
-		
-		// detach the original root from the working and delete the original tree
-		workingCopyRel.delete();
-		deleteTree(original);
-		
-		// reassign working copy to saved copy
-		working.removeProperty(OTINodeProperty.IS_WORKING_COPY.propertyName());
-		working.setProperty(OTINodeProperty.IS_SAVED_COPY.propertyName(), true);
-
-		return working;
-	} */
-	
 	// ===== delete methods
 
 	/**
@@ -533,95 +361,6 @@ public class DatabaseManager extends OTIDatabase {
 		}
 	} */
 	
-	/*
-	 * Reroot the tree containing the `newroot` node on that node. Returns the root node of the rerooted tree.
-	 * @param newroot
-	 * @return
-	 *
-	public Node rerootTree(Node newroot) {
-		
-		// first get the current root node for this tree
-		Node oldRoot = QueryRunner.getRootOfTreeContaining(newroot);
-
-		Transaction tx = graphDb.beginTx(); // TODO: should remove transactions from here. Calling classes/methods should implement these instead
-
-		// not rerooting
-		if (oldRoot == newroot) {
-			try {
-				oldRoot.setProperty(OTINodeProperty.ROOTING_IS_SET.propertyName(), true);
-				tx.success();
-			} finally {
-				tx.finish();
-			}
-			return oldRoot;
-		}
-		
-		Node actualRoot = null;
-		String treeID = null;
-		treeID = (String) oldRoot.getProperty(OTINodeProperty.TREE_ID.propertyName());
-		try {
-			// tritomy the root
-			int oldrootchildcount = DatabaseUtils.getNumberOfRelationships(oldRoot, OTIRelType.CHILDOF, Direction.INCOMING);
-					
-			if (oldrootchildcount == 2) {
-				boolean retvalue = tritomyRoot(oldRoot, newroot);
-				if (retvalue == false) {
-					tx.success();
-					tx.finish();
-					return oldRoot;
-				}
-			}
-			
-			// process the reroot
-			actualRoot = graphDb.createNode();
-			
-			Relationship nrprel = newroot.getSingleRelationship(OTIRelType.CHILDOF, Direction.OUTGOING);
-			Node tempParent = nrprel.getEndNode();
-			actualRoot.createRelationshipTo(tempParent, OTIRelType.CHILDOF);
-			nrprel.delete();
-			newroot.createRelationshipTo(actualRoot, OTIRelType.CHILDOF);
-			processRerootRecursive(actualRoot);
-
-			// switch the METADATAFOR relationship to the new root node
-			Relationship prevStudyToTreeRootLinkRel = oldRoot.getSingleRelationship(OTIRelType.METADATAFOR, Direction.INCOMING);
-			Node metadata = prevStudyToTreeRootLinkRel.getStartNode();
-			prevStudyToTreeRootLinkRel.delete();
-			metadata.createRelationshipTo(actualRoot, OTIRelType.METADATAFOR);
-		
-//			actualRoot.setProperty(OTUNodeProperty.TREE_ID.propertyName(), treeID);
-
-			// disconnect the current root from the saved copy of this tree
-			Relationship workingCopyRel = oldRoot.getSingleRelationship(OTIRelType.WORKINGCOPYOF, Direction.OUTGOING);
-			Node rootNodeOfOriginalCopy = workingCopyRel.getEndNode();
-			workingCopyRel.delete();
-			
-			// clean up properties
-			DatabaseUtils.exchangeAllProperties(oldRoot, actualRoot); // TODO: are there properties we don't want to exchange?
-			actualRoot.setProperty(OTINodeProperty.ROOTING_IS_SET.propertyName(), true);
-			
-			// update indexes
-			indexer.removeTreeRootNodeFromIndexes(oldRoot);
-			indexer.addTreeRootNodeToIndexes(actualRoot);
-			
-			// reset the ingroup
-			actualRoot.setProperty(OTINodeProperty.INGROUP_IS_SET.propertyName(), false);
-			actualRoot.removeProperty(OTINodeProperty.INGROUP_START_NODE_ID.propertyName());
-			for (Node child : Traversal.description().relationships(OTIRelType.CHILDOF, Direction.INCOMING).traverse(actualRoot).nodes()) {
-				child.removeProperty(OTINodeProperty.IS_WITHIN_INGROUP.propertyName());
-				child.removeProperty(OTINodeProperty.IS_INGROUP_ROOT.propertyName());
-			}
-
-			// reattach to the saved copy
-			actualRoot.createRelationshipTo(rootNodeOfOriginalCopy, OTIRelType.WORKINGCOPYOF);
-			
-			tx.success();
-		} finally {
-			tx.finish();
-		}
-		
-		return actualRoot;
-	} */
-	
 	/**
 	 * Set the ingroup for the tree containing `innode` to `innode`.
 	 * @param innode
@@ -629,7 +368,7 @@ public class DatabaseManager extends OTIDatabase {
 	public void designateIngroup(Node innode) {
 
 		// first get the root of the old tree
-		Node root = QueryRunner.getRootOfTreeContaining(innode);
+		Node root = OTIDatabaseUtils.getRootOfTreeContaining(innode);
 
 		TraversalDescription CHILDOF_TRAVERSAL = Traversal.description().relationships(OTIRelType.CHILDOF, Direction.INCOMING);
 		Transaction tx = graphDb.beginTx();
@@ -681,76 +420,6 @@ public class DatabaseManager extends OTIDatabase {
 	
 	// ========== private methods
 	
-	/*
-	 * A recursive function to facilitate copying trees
-	 * 
-	 * @param original
-	 * @param copy
-	 *
-	private void copyTreeRecursive(Node original, Node copy, Long nodeIdOfInterest) {
-		
-		// if this node is one we want to remember, then do that
-		if (nodeIdOfInterest != null) {
-			if (original.getId() == nodeIdOfInterest) {
-				workingCopyNodeOfInterest = copy;
-			}
-		}
-		
-		Map<Node, Node> childrenToCopy = new HashMap<Node, Node>();
-		
-		for (Relationship originalChildRel : original.getRelationships(Direction.INCOMING, OTIRelType.CHILDOF)) {
-			
-			// make a new copy of this child node and attach it to the copy of the parent
-			Node copiedChild = graphDb.createNode();
-			Relationship copiedChildRel = copiedChild.createRelationshipTo(copy, OTIRelType.CHILDOF);
-
-			// remember this child so we can copy its children
-			Node originalChild = originalChildRel.getStartNode();
-			childrenToCopy.put(originalChild, copiedChild);
-
-			// copy all properties
-			DatabaseUtils.copyAllProperties(originalChild, copiedChild);
-			DatabaseUtils.copyAllProperties(originalChildRel, copiedChildRel);
-		}
-		
-		// recur on the children
-		for (Entry<Node, Node> nodePairToCopy : childrenToCopy.entrySet()) {
-			copyTreeRecursive(nodePairToCopy.getKey(), nodePairToCopy.getValue(), nodeIdOfInterest);
-		}
-	} */
-	
-	/*
-	 * Add a known remote to the graph property for known remotes, which is a primitive string array. We
-	 * could also just add nodes for all remotes and index them
-	 * @param remote
-	 *
-	private void addKnownRemote(String newRemote) {
-		
-		List<String> knownRemotesPrev = browser.getKnownRemotes();
-		String[] knownRemotesNew = new String[knownRemotesPrev.size()+1];
-		
-		int i = 0;
-		for (String r : knownRemotesPrev) {
-			knownRemotesNew[i++] = r;
-		}
-
-		knownRemotesNew[i] = newRemote;
-		graphDb.getNodeById((long)0).setProperty(OTIGraphProperty.KNOWN_REMOTES.propertyName(), knownRemotesNew);
-		
-		updateKnownRemotesInternal();
-	} */
-	
-	/*
-	 * Just update the internal cache of known remotes. Called when we add a remote and also during construction.
-	 * We keep this cached so we don't have to check the graph property array every time we add a source.
-	 *
-	private void updateKnownRemotesInternal() {
-		knownRemotes = new HashSet<String>();
-		for (String remote : browser.getKnownRemotes()) {
-			knownRemotes.add(remote);
-		}
-	} */
-	
 	/**
 	 * A recursive function used to replicate the tree JadeNode structure below the passed in JadeNode in the graph.
 	 * @param curJadeNode
@@ -763,20 +432,19 @@ public class DatabaseManager extends OTIDatabase {
 
 		// remember the ingroup if we hit one
 		if (curJadeNode.hasAssocObject(OTINodeProperty.IS_INGROUP_ROOT.propertyName()) == true) {
-//			withinIngroup = true;
 			curGraphNode.setProperty(OTINodeProperty.INGROUP_START_NODE_ID.propertyName(), true);
 			lastObservedIngroupStartNode = curGraphNode;
 		}
-		
-		// set the ingroup flag if we're within the ingroup
-//		if (withinIngroup) {
-//			curGraphNode.setProperty(NodeProperty.IS_WITHIN_INGROUP.propertyName(), true);
-//		}
-		
+				
 		// add properties
 		if (curJadeNode.getName() != null) {
 			curGraphNode.setProperty(OTVocabularyPredicate.OT_OTT_TAXON_NAME.propertyName(), curJadeNode.getName());
-			setNodePropertiesFromMap(curGraphNode, curJadeNode.getAssoc()); // why not?
+			
+//			String mappedTaxonNameNoSpaces = OTIDatabaseUtils.substituteWhitespace(curJadeNode.getName());
+//			curJadeNode.assocObject(OTINodeProperty.OT_MAPPED_TAXON_NAME_NO_SPACES.propertyName(), mappedTaxonNameNoSpaces);
+//			curGraphNode.setProperty(OTINodeProperty.OT_MAPPED_TAXON_NAME_NO_SPACES.propertyName(), mappedTaxonNameNoSpaces);
+			
+			setNodePropertiesFromMap(curGraphNode, curJadeNode.getAssoc());
 		}
 
 		// TODO: add bl
@@ -793,11 +461,19 @@ public class DatabaseManager extends OTIDatabase {
 		
 		// mark the tips as OTU nodes
 		if (curJadeNode.getChildCount() < 1) {
-			curGraphNode.setProperty(OTVocabularyPredicate.OT_IS_OTU.propertyName(), true);
+			curGraphNode.setProperty(OTVocabularyPredicate.OT_IS_LEAF.propertyName(), true);
 			
 			// for otu nodes, connect them to the taxonomy
 			connectTreeNodeToTaxonomy(curGraphNode);
+			
+			// also calculate special values for tip nodes
+//			String originalLabelNoSpaces = OTIDatabaseUtils.substituteWhitespace((String) curJadeNode.getObject(OTVocabularyPredicate.OT_ORIGINAL_LABEL.propertyName()));
+//			curJadeNode.assocObject(OTINodeProperty.OT_ORIGINAL_LABEL_NO_SPACES.propertyName(), originalLabelNoSpaces);
+//			curGraphNode.setProperty(OTINodeProperty.OT_ORIGINAL_LABEL_NO_SPACES.propertyName(), originalLabelNoSpaces);
+			
 		}
+
+		indexer.addTreeNodeToIndexes(curGraphNode);
 
 		return curGraphNode;
 	}
@@ -821,36 +497,39 @@ public class DatabaseManager extends OTIDatabase {
 	 */
 	private void collectTipTaxonArrayPropertiesFromJadeTree(Node node, JadeTree tree) {
 		
-		originalTaxonNames = new ArrayList<String>();
+		originalTipLabels = new ArrayList<String>();
+		originalTipLabelsNoSpaces = new ArrayList<String>();
 		mappedTaxonNames = new ArrayList<String>();
 		mappedTaxonNamesNoSpaces = new ArrayList<String>();
 		mappedOTTIds = new ArrayList<Long>();
 
-		for (JadeNode treeNode : tree.getRoot().getDescendantLeaves()) {
+		for (JadeNode tip : tree.getRoot().getDescendantLeaves()) {
 
-			originalTaxonNames.add((String) treeNode.getObject(OTVocabularyPredicate.OT_ORIGINAL_LABEL.propertyName()));
+			originalTipLabels.add((String) tip.getObject(OTVocabularyPredicate.OT_ORIGINAL_LABEL.propertyName()));
+//			originalTipLabelsNoSpaces.add((String) tip.getObject(OTINodeProperty.OT_ORIGINAL_LABEL_NO_SPACES.propertyName()));
 
-			if (treeNode.hasAssocObject(OTVocabularyPredicate.OT_OTT_ID.propertyName())) {
+			if (tip.hasAssocObject(OTVocabularyPredicate.OT_OTT_ID.propertyName())) {
 				// If the node has not been explicitly mapped, we will not record the name as a mapped name
-				String name = treeNode.getName();
-				mappedTaxonNames.add(name);
-				mappedTaxonNamesNoSpaces.add(name.replace("\\s+", OTIConstants.WHITESPACE_SUBSTITUTE_FOR_SEARCH));
+				mappedTaxonNames.add(tip.getName());
+//				mappedTaxonNamesNoSpaces.add((String) tip.getObject(OTINodeProperty.OT_MAPPED_TAXON_NAME_NO_SPACES.propertyName()));
+				
 			}
 
-			Long ottId = (Long) treeNode.getObject(OTVocabularyPredicate.OT_OTT_ID.propertyName());
+			Long ottId = (Long) tip.getObject(OTVocabularyPredicate.OT_OTT_ID.propertyName());
 			if (ottId != null) {
 				mappedOTTIds.add(ottId);
 			}
 		}
+		
 		assignTaxonArraysToNode(node);
 	}
 	
-	/**
-	 * Collects taxonomic names and ids for all the tips of the provided JadeTree and stores this info as node properties
-	 * of the provided graph node. Used to store taxonomic mapping info for the root nodes of trees in the graph.
+	/*
+	 * Collects taxonomic names and ids for all the tips of the provided tree stored in the graph, and stores this info
+	 * as node properties of the provided graph node. Used to store taxonomic mapping info for the root nodes of trees in the graph.
 	 * @param node
 	 * @param tree
-	 */
+	 *
 	private void collectTipTaxonArrayPropertiesFromGraph(Node node) {
 		
 		originalTaxonNames = new ArrayList<String>();
@@ -858,7 +537,7 @@ public class DatabaseManager extends OTIDatabase {
 		mappedTaxonNamesNoSpaces = new ArrayList<String>();
 		mappedOTTIds = new ArrayList<Long>();
 
-		for (Node tip : QueryRunner.getDescendantTips(node)) {
+		for (Node tip : OTIDatabaseUtils.getDescendantTips(node)) {
 
 			originalTaxonNames.add((String) tip.getProperty(OTVocabularyPredicate.OT_ORIGINAL_LABEL.propertyName()));
 
@@ -875,7 +554,7 @@ public class DatabaseManager extends OTIDatabase {
 			}
 		}
 		assignTaxonArraysToNode(node);
-	}
+	} */
 	
 	/**
 	 * A helper function for the collectTipTaxonArrayProperties functions. Exists only to ensure consistency and simplify code.
@@ -884,18 +563,18 @@ public class DatabaseManager extends OTIDatabase {
 	private void assignTaxonArraysToNode(Node node) {
 		
 		// store the properties we just collected
-		node.setProperty(OTINodeProperty.DESCENDANT_ORIGINAL_TAXON_NAMES.propertyName(), GeneralUtils.convertToStringArray(originalTaxonNames));
+		node.setProperty(OTINodeProperty.DESCENDANT_ORIGINAL_TIP_LABELS.propertyName(), GeneralUtils.convertToStringArray(originalTipLabels));
+//		node.setProperty(OTINodeProperty.DESCENDANT_MAPPED_TAXON_NAMES_WHITESPACE_FILLED.propertyName(), GeneralUtils.convertToStringArray(mappedTaxonNamesNoSpaces));
 		node.setProperty(OTINodeProperty.DESCENDANT_MAPPED_TAXON_NAMES.propertyName(), GeneralUtils.convertToStringArray(mappedTaxonNames));
-		node.setProperty(OTINodeProperty.DESCENDANT_MAPPED_TAXON_NAMES_WHITESPACE_FILLED.propertyName(), GeneralUtils.convertToStringArray(mappedTaxonNamesNoSpaces));
+//		node.setProperty(OTINodeProperty.DESCENDANT_ORIGINAL_TIP_LABELS_WHITESPACE_FILLED.propertyName(), GeneralUtils.convertToStringArray(originalTipLabelsNoSpaces));
 		node.setProperty(OTINodeProperty.DESCENDANT_MAPPED_TAXON_OTT_IDS.propertyName(), GeneralUtils.convertToLongArray(mappedOTTIds));
 		
 		// clean up the mess... just to be sure we don't accidentally use this information somewhere else
-		originalTaxonNames = null;
+		originalTipLabels = null;
 		mappedTaxonNames = null;
 		mappedTaxonNamesNoSpaces = null;
 		mappedOTTIds = null;
 	}
-
 	
 	/*
 	 * Used by the rerooting function

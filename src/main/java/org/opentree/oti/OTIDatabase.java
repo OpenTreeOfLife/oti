@@ -25,10 +25,10 @@ public class OTIDatabase extends DatabaseAbstractBase {
 		super(gdb);
 	}
 	
-	// Currently we always want fulltext indexes for OTI itself, so just we code that in here.
+	// Currently OTI uses different kinds of indexes, which are described by the `parameters` argument
 	// To specify other types of indexes we can just pass the relevant parameters as String... arguments,
 	// which will invoke the analagous underlying method in DatabaseAbstractBase. See DatabaseManager for an example.
 	public Index<Node> getNodeIndex(NodeIndexDescription index) {
-		return graphDb.getNodeIndex(index.indexName(), IndexManager.PROVIDER, "lucene", "type", "fulltext");
+		return graphDb.getNodeIndex(index.indexName(), index.parameters());
 	}
 }

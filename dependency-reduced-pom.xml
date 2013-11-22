@@ -2,10 +2,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>opentree</groupId>
-  <artifactId>otu</artifactId>
+  <artifactId>oti</artifactId>
   <name>otu</name>
   <version>0.0.1-SNAPSHOT</version>
-  <description>Server-side restful plugins for the opentree project.</description>
+  <description>Indexing and searching for the opentree nexsons</description>
   <build>
     <resources>
       <resource>
@@ -44,7 +44,7 @@
             <configuration>
               <transformers>
                 <transformer>
-                  <mainClass>org.opentree.plugins.PhylografterUpdater</mainClass>
+                  <mainClass>org.opentree.oti.plugins.EmptyMainClass</mainClass>
                 </transformer>
               </transformers>
             </configuration>

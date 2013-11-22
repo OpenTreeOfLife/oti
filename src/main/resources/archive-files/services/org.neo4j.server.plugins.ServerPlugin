@@ -1,2 +1,3 @@
-org.opentree.otu.plugins.IndexServices
-org.opentree.otu.plugins.QueryServices
+org.opentree.oti.plugins.IndexServices
+org.opentree.oti.plugins.QueryServices
+org.opentree.oti.plugins.NexsonServices
