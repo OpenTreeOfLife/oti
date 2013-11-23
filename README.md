@@ -27,6 +27,8 @@ sh mvn_install_dependencies.sh
 
 OTI uses the jade, ot-base, and taxomachine classes for many things. The source code for these dependencies is reasonably well-documented. You can refer to the class files in the jade and ot-base directories for more information. If you use Eclipse (with the m2eclipse plugin), just import the ot-base and jade repos as maven projects to browse their packages and classes.
 
+If you have old versions of these repositoties installed, you will need to update them (```git pull && ./mvn_install.sh```).
+
 Setup
 -----
 
