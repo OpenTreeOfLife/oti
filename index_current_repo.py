@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 
-import json, urllib, urllib2, pycurl
+import json, urllib2, pycurl
+
 
 def submit_request(data):
-    
+    '''Send a request to oti to index a single study. URL is set to default neo4j location'''
     c = pycurl.Curl()
     c.setopt(c.URL, "http://localhost:7474/db/data/ext/IndexServices/graphdb/indexSingleNexson")
     c.setopt(c.HTTPHEADER, ["Content-type:Application/json"])
     c.setopt(c.POSTFIELDS, data)
     c.setopt(c.VERBOSE, True)
-    
     c.perform()
 
 files_base_url = "https://raw.github.com/OpenTreeOfLife/treenexus/master"
@@ -18,8 +18,9 @@ studies = urllib2.urlopen(studies_url)
 
 for study in json.loads(studies.read()):
     
-    print indexing
-    data = {"url" : "/".join([files_base_url, "study", study["name"], study["name"] + ".json"])}
+    study_id = study["name"]
+    print "indexing study " + study_id
+    data = {"url" : "/".join([files_base_url, "study", study_id, study_id + ".json"])}
     submit_request(json.dumps(data))
 
 

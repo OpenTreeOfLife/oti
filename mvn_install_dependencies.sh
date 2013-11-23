@@ -9,3 +9,9 @@ cd ../
 git clone git@github.com:OpenTreeOfLife/ot-base.git
 cd ot-base
 sh mvn_install.sh
+
+# install taxomachine repo
+cd ../
+git clone git@github.com:OpenTreeOfLife/taxomachine.git
+cd taxomachine
+sh mvn_install.sh
