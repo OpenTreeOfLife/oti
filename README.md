@@ -45,13 +45,13 @@ Using OTI
 
 ####Indexing
 
-For OTI to be useful, you will need to index some nexsons. The "IndexSingleNexson" service provides a method to do that. It accepts a single parameter, which is the url of the nexson file to be indexed. A single nexson study is assumed to be exist within a single nexson file. For more information:
+For OTI to be useful, you will need to index some nexsons. The "IndexSingleNexson" service provides a method to do that. It accepts a single parameter, which is the url of the nexson file to be indexed. A single nexson study is assumed to be contained within a single nexson file. For more information:
 
 ```
 curl -v http://localhost:7474/db/data/ext/IndexServices/graphdb/indexSingleNexson
 ```
 
-A python script is provided to facilitate indexing all studies in the treenexus repo. It takes no arguments:
+A python script is provided to facilitate indexing all studies in the most recent commit to master in the treenexus repo. It takes no arguments:
 
 ```
 python index_current_repo.py
@@ -75,7 +75,7 @@ For more information on queries:
 curl -v http://localhost:7474/db/data/ext/QueryServices/
 ```
 
-Some example queries are (note, these will return empty results if no matching studies have been indexed):
+Some example queries follow. Note, these will return empty results if no matching studies have been indexed:
 
 ```
 curl -X POST http://localhost:7474/db/data/ext/QueryServices/graphdb/singlePropertySearchForTrees/ -H "Content-type:Application/json" -d '{"property":"ot:ottTaxonName","value":"Carex"}'
