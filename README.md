@@ -32,7 +32,7 @@ If you have old versions of these repositoties installed, you will need to updat
 Setup
 -----
 
-You can get OTI set up with the included shell script using the command ```sh setup_oti.sh```. The script can also be used for reference. OTI runs inside a neo4j installation as a server plugin, which exposes indexing and searching features via the standard neo4j HTTP interface for plugin extensions. Once you have a neo4j installation with the OTI plugin running, you can check the available services using curl, for instance:
+You can get OTI set up with the included shell script using the command ```sh setup_oti.sh```. The script can also be used for reference if you want to do a more custom installation. OTI runs inside a neo4j installation as a server plugin, which exposes indexing and searching features via the standard neo4j HTTP interface for plugin extensions. Once you have a neo4j installation with the OTI plugin running, you can check the available services using curl, for instance:
 
 ```
 curl -v http://localhost:7474/db/data/
