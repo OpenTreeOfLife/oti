@@ -3,7 +3,7 @@
   <groupId>opentree</groupId>
   <artifactId>oti</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <name>otu</name>
+  <name>oti</name>
   <description>Indexing and searching for the opentree nexsons</description>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
