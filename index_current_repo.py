@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
-import json, urllib2, pycurl
-
+import json, urllib2, pycurl, sys
 
 def submit_request(data):
     '''Send a request to oti to index a single study. URL is set to default neo4j location'''
