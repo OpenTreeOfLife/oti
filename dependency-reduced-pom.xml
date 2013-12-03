@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>opentree</groupId>
   <artifactId>oti</artifactId>
-  <name>otu</name>
+  <name>oti</name>
   <version>0.0.1-SNAPSHOT</version>
   <description>Indexing and searching for the opentree nexsons</description>
   <build>
