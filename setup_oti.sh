@@ -90,7 +90,7 @@ fi
 # recompile plugin if necessary
 if [ ! -f $OTI_PLUGIN_INSTALL_LOC ]; then
     ./mvn_serverplugins.sh
-    mv target/oti-0.0.1-SNAPSHOT.jar $OTI_PLUGIN_INSTALL_LOC
+    mv $OTI_HOME/target/oti-neo4j-plugins-0.0.1-SNAPSHOT.jar $OTI_PLUGIN_INSTALL_LOC
 fi
 
 OTI_DB="$OTI_NEO4J_HOME/data/graph.db"
