@@ -79,8 +79,6 @@ printf "\nusing oti at: $OTI_HOME\n"
 
 cd $OTI_HOME
 OTI_PLUGIN_INSTALL_LOC="$OTI_NEO4J_HOME/plugins/oti-0.0.1-SNAPSHOT.jar"
-#echo $OTI_PLUGIN_INSTALL_LOC
-#exit
 
 # remove previous plugin if requested
 if [ $RECOMPILE ] || [ $UPDATE ]; then
@@ -103,20 +101,3 @@ if [ $RESTART_NEO4J ]; then
     # start the neo4j. cannot have other running neo4j instances or this will fail!
     $OTI_NEO4J_DAEMON restart
 fi
-
-#if [ $OPEN_OTU ]; then
-#    # open the tool in the web browser
-#    OTU_URL="http://localhost:8000/"
-#    if [ $LINUX ]; then
-#        xdg-open "$OTU_URL"
-#    elif [ $MAC ]; then
-#        open "$OTU_URL"
-#    fi
-#fi
-
-#if [ $START_OTU ]; then
-#
-#    # start the webserver (from the views directory -- this is important for redirects)
-#    cd "$OTU_HOME/views"
-#    ./server.py
-#fi
