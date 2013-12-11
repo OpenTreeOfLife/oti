@@ -155,9 +155,10 @@ public class IndexServices extends ServerPlugin {
 	 */
 	private NexsonSource readRemoteNexson(String url) throws MalformedURLException, IOException {
 		BufferedReader nexson = new BufferedReader(new InputStreamReader(new URL(url).openStream()));
-		MessageLogger msgLogger = new MessageLogger("");
+//		MessageLogger msgLogger = new MessageLogger("");
 
 		// TODO: sometimes this returns a null for the first tree, but no errors. Why? Why don't we get an error?
-		return NexsonReader.readNexson(nexson, false, msgLogger);
+//		return NexsonReader.readNexson(nexson, false, msgLogger);
+		return new NexsonSource(nexson);
 	}
 }
