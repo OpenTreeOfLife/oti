@@ -439,29 +439,21 @@ public class DatabaseManager extends OTIDatabase {
 		Node curGraphNode = graphDb.createNode();
 		NexsonNode curNexsonNode = (NexsonNode) curJadeNode.getObject(NexsonNode.NEXSON_NODE_JADE_OBJECT_KEY);
 
-		// remember the ingroup if we hit one
-//		if (curJadeNode.hasAssocObject(OTINodeProperty.IS_INGROUP_ROOT.propertyName()) == true) {
+		// remember the ingroup if we hit one // TODO: might be able to clean this up by using the tree property set during nexson parsing...
 		if (curNexsonNode.hasProperty(OTINodeProperty.IS_INGROUP_ROOT.propertyName())) {
 			curGraphNode.setProperty(OTINodeProperty.INGROUP_START_NODE_ID.propertyName(), true);
 			lastObservedIngroupStartNode = curGraphNode;
 		}
 				
 		// add properties
-//		if (curJadeNode.getName() != null) {
 		if (curNexsonNode.getOTU() != null) {
 			curGraphNode.setProperty(OTVocabularyPredicate.OT_OTT_TAXON_NAME.propertyName(), curNexsonNode.getOTU().getLabel());
-			
-//			String mappedTaxonNameNoSpaces = OTIDatabaseUtils.substituteWhitespace(curJadeNode.getName());
-//			curJadeNode.assocObject(OTINodeProperty.OT_MAPPED_TAXON_NAME_NO_SPACES.propertyName(), mappedTaxonNameNoSpaces);
-//			curGraphNode.setProperty(OTINodeProperty.OT_MAPPED_TAXON_NAME_NO_SPACES.propertyName(), mappedTaxonNameNoSpaces);
-			
-//			setNodePropertiesFromMap(curGraphNode, curJadeNode.getAssoc());
 			setNodePropertiesFromMap(curGraphNode, curNexsonNode.getProperties());
 		}
 
-		// TODO: add bl
-		// dbnode.setProperty("bl", innode.getBL());
-		// TODO: add support
+		if (curNexsonNode.getParentBranchLength() != null) {
+			curGraphNode.setProperty(OTINodeProperty.PARENT_BRANCH_LENGTH.propertyName(), curNexsonNode.getParentBranchLength());
+		}
 		
 		if (parentGraphNode != null) {
 			curGraphNode.createRelationshipTo(parentGraphNode, OTIRelType.CHILDOF);
@@ -470,22 +462,9 @@ public class DatabaseManager extends OTIDatabase {
 		for (JadeNode childJadeNode : curJadeNode.getChildren()) {
 			preorderAddTreeToDB(childJadeNode, curGraphNode);
 		}
-		
-		// mark the tips as OTU nodes
-//		if (curJadeNode.getChildCount() < 1) {
-//		if (curNexsonNode.hasProperty(OTVocabularyPredicate.OT_IS_LEAF.propertyName())) {
-
-//			curGraphNode.setProperty(OTVocabularyPredicate.OT_IS_LEAF.propertyName(), true);
 
 		if (curNexsonNode.getOTU() != null) {
-			// for otu nodes, connect them to the taxonomy
 			connectTreeNodeToTaxonomy(curGraphNode);
-			
-			// also calculate special values for tip nodes
-//			String originalLabelNoSpaces = OTIDatabaseUtils.substituteWhitespace((String) curJadeNode.getObject(OTVocabularyPredicate.OT_ORIGINAL_LABEL.propertyName()));
-//			curJadeNode.assocObject(OTINodeProperty.OT_ORIGINAL_LABEL_NO_SPACES.propertyName(), originalLabelNoSpaces);
-//			curGraphNode.setProperty(OTINodeProperty.OT_ORIGINAL_LABEL_NO_SPACES.propertyName(), originalLabelNoSpaces);
-			
 		}
 
 		indexer.addTreeNodeToIndexes(curGraphNode);
@@ -510,84 +489,31 @@ public class DatabaseManager extends OTIDatabase {
 	 * @param node
 	 * @param tree
 	 */
-//	private void collectTipTaxonArrayPropertiesFromJadeTree(Node node, JadeTree tree) {
 	private void collectTipTaxonArrayPropertiesFromJadeTree(Node node, NexsonTree tree) {
 
 		originalTipLabels = new ArrayList<String>();
-//		originalTipLabelsNoSpaces = new ArrayList<String>(); // remove?
 		mappedTaxonNames = new ArrayList<String>();
-//		mappedTaxonNamesNoSpaces = new ArrayList<String>(); // remove?
 		mappedOTTIds = new ArrayList<Long>();
 
 		for (JadeNode tip : tree.getRoot().getDescendantLeaves()) {
 			
 			NexsonOTU otu = ((NexsonNode) tip.getObject(NexsonNode.NEXSON_NODE_JADE_OBJECT_KEY)).getOTU();
 
-			if (otu != null) { // TODO: this indicates invalid nexson. should we even allow this case?
+			if (otu != null) { // TODO: this indicates invalid nexson: the otu assigned to this tip cannot be found. should we even allow this case?
 				
 				if (otu.getProperty(OTVocabularyPredicate.OT_ORIGINAL_LABEL.propertyName()) != null) {
 					originalTipLabels.add((String) otu.getProperty(OTVocabularyPredicate.OT_ORIGINAL_LABEL.propertyName()));
 				}
 				
-	//			originalTipLabels.add((String) tip.getObject(OTVocabularyPredicate.OT_ORIGINAL_LABEL.propertyName()));
-	//			originalTipLabelsNoSpaces.add((String) tip.getObject(OTINodeProperty.OT_ORIGINAL_LABEL_NO_SPACES.propertyName()));
-	
-				
 				if (otu.getProperty(OTVocabularyPredicate.OT_OTT_ID.propertyName()) != null) {
-					// If the node has not been explicitly mapped, we will not record the name as a mapped name
-				
 					mappedOTTIds.add((Long) otu.getProperty(OTVocabularyPredicate.OT_OTT_ID.propertyName()));
-	
-	//			if (nexsonTipNode.propertyIsNotNull(OTVocabularyPredicate..propertyName())) {
-					mappedTaxonNames.add((String) otu.getLabel()); // TODO: switch this over to ot:ottTaxonName property once this is available
-	
-	//				mappedTaxonNames.add(tip.getName());
-	//				mappedTaxonNamesNoSpaces.add((String) tip.getObject(OTINodeProperty.OT_MAPPED_TAXON_NAME_NO_SPACES.propertyName()));
-					
+					mappedTaxonNames.add((String) otu.getLabel()); // TODO: switch this over to ot:ottTaxonName property once this is available	
 				}
 			}
-			
-//			Long ottId = (Long) tip.getObject(OTVocabularyPredicate.OT_OTT_ID.propertyName());
-//			Long ottId = (Long) tip.getObject(OTVocabularyPredicate.OT_OTT_ID.propertyName());
-//			if (ottId != null) {
-//				mappedOTTIds.add(ottId);
-//			}
 		}
 		
 		assignTaxonArraysToNode(node);
 	}
-	
-	/*
-	 * Collects taxonomic names and ids for all the tips of the provided tree stored in the graph, and stores this info
-	 * as node properties of the provided graph node. Used to store taxonomic mapping info for the root nodes of trees in the graph.
-	 * @param node
-	 * @param tree
-	 *
-	private void collectTipTaxonArrayPropertiesFromGraph(Node node) {
-		
-		originalTaxonNames = new ArrayList<String>();
-		mappedTaxonNames = new ArrayList<String>();
-		mappedTaxonNamesNoSpaces = new ArrayList<String>();
-		mappedOTTIds = new ArrayList<Long>();
-
-		for (Node tip : OTIDatabaseUtils.getDescendantTips(node)) {
-
-			originalTaxonNames.add((String) tip.getProperty(OTVocabularyPredicate.OT_ORIGINAL_LABEL.propertyName()));
-
-			// only record explicit mapped names as mapped names
-			if (tip.hasProperty(OTVocabularyPredicate.OT_OTT_TAXON_NAME.propertyName())) {
-				String name = (String) tip.getProperty(OTVocabularyPredicate.OT_OTT_TAXON_NAME.propertyName());
-				mappedTaxonNames.add(name);
-				mappedTaxonNamesNoSpaces.add(name.replace("\\s+", OTIConstants.WHITESPACE_SUBSTITUTE_FOR_SEARCH));
-			}
-
-			if (tip.hasProperty(OTVocabularyPredicate.OT_OTT_ID.propertyName())) {
-				Long ottId = (Long) tip.getProperty(OTVocabularyPredicate.OT_OTT_ID.propertyName());
-				mappedOTTIds.add(ottId);
-			}
-		}
-		assignTaxonArraysToNode(node);
-	} */
 	
 	/**
 	 * A helper function for the collectTipTaxonArrayProperties functions. Exists only to ensure consistency and simplify code.
@@ -597,66 +523,12 @@ public class DatabaseManager extends OTIDatabase {
 		
 		// store the properties we just collected
 		node.setProperty(OTINodeProperty.DESCENDANT_ORIGINAL_TIP_LABELS.propertyName(), GeneralUtils.convertToStringArray(originalTipLabels));
-//		node.setProperty(OTINodeProperty.DESCENDANT_MAPPED_TAXON_NAMES_WHITESPACE_FILLED.propertyName(), GeneralUtils.convertToStringArray(mappedTaxonNamesNoSpaces));
 		node.setProperty(OTINodeProperty.DESCENDANT_MAPPED_TAXON_NAMES.propertyName(), GeneralUtils.convertToStringArray(mappedTaxonNames));
-//		node.setProperty(OTINodeProperty.DESCENDANT_ORIGINAL_TIP_LABELS_WHITESPACE_FILLED.propertyName(), GeneralUtils.convertToStringArray(originalTipLabelsNoSpaces));
 		node.setProperty(OTINodeProperty.DESCENDANT_MAPPED_TAXON_OTT_IDS.propertyName(), GeneralUtils.convertToLongArray(mappedOTTIds));
 		
 		// clean up the mess... just to be sure we don't accidentally use this information somewhere else
 		originalTipLabels = null;
 		mappedTaxonNames = null;
-//		mappedTaxonNamesNoSpaces = null;
 		mappedOTTIds = null;
 	}
-	
-	/*
-	 * Used by the rerooting function
-	 * @param oldRoot
-	 * @param newRoot
-	 * @return
-	 *
-	private boolean tritomyRoot(Node oldRoot, Node newRoot) {
-		Node thisNode = null;// this will be the node that is sunk
-		// find the first child that is not a tip
-		for (Relationship rel : oldRoot.getRelationships(OTIRelType.CHILDOF, Direction.INCOMING)) {
-			Node tnode = rel.getStartNode();
-			if (tnode.hasRelationship(Direction.INCOMING, OTIRelType.CHILDOF) && tnode.getId() != newRoot.getId()) {
-				thisNode = tnode;
-				break;
-			}
-		}
-		if (thisNode == null) {
-			return false;
-		}
-		for (Relationship rel : thisNode.getRelationships(OTIRelType.CHILDOF, Direction.INCOMING)) {
-			Node eNode = rel.getStartNode();
-			eNode.createRelationshipTo(oldRoot, OTIRelType.CHILDOF);
-			rel.delete();
-		}
-		thisNode.getSingleRelationship(OTIRelType.CHILDOF, Direction.OUTGOING).delete();
-		thisNode.delete();
-		return true;
-	} */
-
-	/*
-	 * Recursive function to process a re-rooted tree to fix relationship direction, etc.
-	 * @param innode
-	 *
-	private void processRerootRecursive(Node innode) {
-		if (innode.hasProperty(OTINodeProperty.IS_ROOT.propertyName()) || innode.hasRelationship(Direction.INCOMING, OTIRelType.CHILDOF) == false) {
-			return;
-		}
-		Node parent = null;
-		if (innode.hasRelationship(Direction.OUTGOING, OTIRelType.CHILDOF)) {
-			parent = innode.getSingleRelationship(OTIRelType.CHILDOF, Direction.OUTGOING).getEndNode();
-			processRerootRecursive(parent);
-		}
-
-		DatabaseUtils.exchangeNodeProperty(parent, innode, OTINodeProperty.NAME.propertyName());
-
-		// Rearrange topology
-		innode.getSingleRelationship(OTIRelType.CHILDOF, Direction.OUTGOING).delete();
-		parent.createRelationshipTo(innode, OTIRelType.CHILDOF);
-	} */
-
 }

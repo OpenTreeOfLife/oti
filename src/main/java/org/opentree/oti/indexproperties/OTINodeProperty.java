@@ -79,6 +79,11 @@ public enum OTINodeProperty implements OTPropertyPredicate {
 	NEXSON_ID ("nexson_id", String.class),
 	
 	/**
+	 * The branch length of the parent branch of this node.
+	 */
+	PARENT_BRANCH_LENGTH("parent_branch_length", Double.class),
+	
+	/**
 	 * A flag specifying that the clade represented by the node is the ingroup for the tree. Is only set on the root node
 	 * of the ingroup clade. A phylografter property imported by NexsonReader.
 	 */
