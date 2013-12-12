@@ -189,7 +189,7 @@ public class QueryServices extends ServerPlugin {
 				@Parameter(name = "property", optional = false) String property,
 			@Description("The value to be searched. This must be passed as a string, but will be converted to the datatype corresponding to the "
 					+ "specified searchable value.") @Parameter(name = "value", optional = false) String value,
-			@Description("Whether to perform fuzzy matching (only applies to certain string properties). Fuzzy matching is enabled by default.")
+			@Description("Whether to perform exact matching ONLY. Defaults to false, i.e. fuzzy matching is enabled. Only applicable for some string properties.")
 				@Parameter(name="exact", optional = true) Boolean doFuzzyMatching) {
 				
 		QueryRunner runner = new QueryRunner(graphDb);
@@ -218,7 +218,7 @@ public class QueryServices extends ServerPlugin {
 		}
 		
 		// only use fulltext search if user hasn't designated exact matching only
-		if (doFuzzyMatching == null || doFuzzyMatching == true) {
+		if (Boolean.FALSE.equals(doFuzzyMatching)) {
 			
 			// check fulltext array properties
 			for (OTPropertyArray p : IndexedArrayProperties.TREE_NODES_FULLTEXT.properties()) {
