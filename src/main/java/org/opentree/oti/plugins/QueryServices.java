@@ -85,7 +85,7 @@ public class QueryServices extends ServerPlugin {
 				
 		HashMap<String, Object> results = new HashMap<String, Object>();
 		if (searchProperty != null) {
-			results.put("results", runner.doBasicSearchForStudies(searchProperty, value, isExactProperty, isFulltextProperty));
+			results.put("matched_studies", runner.doBasicSearchForStudies(searchProperty, value, isExactProperty, isFulltextProperty));
 		} else {
 			results.put("error", "uncrecognized property: " + property);
 		}
@@ -178,6 +178,8 @@ public class QueryServices extends ServerPlugin {
 			@Description("The value to be searched. This must be passed as a string, but will be converted to the datatype corresponding to the "
 					+ "specified searchable value.") @Parameter(name = "value", optional = false) String value) {
 		
+		// TODO: option to allow exact searching only
+		
 		QueryRunner runner = new QueryRunner(graphDb);
 		boolean isExactProperty = false;
 		boolean isFulltextProperty = false;
@@ -225,7 +227,7 @@ public class QueryServices extends ServerPlugin {
 		
 		HashMap<String, Object> results = new HashMap<String, Object>();
 		if (searchProperty != null) {
-			results.put("results", runner.doBasicSearchForTreeNodes(searchProperty, value, isExactProperty, isFulltextProperty));
+			results.put("matched_studies", runner.doBasicSearchForTreeNodes(searchProperty, value, isExactProperty, isFulltextProperty));
 		} else {
 			results.put("error", "uncrecognized property: " + property);
 		}
