@@ -104,7 +104,9 @@ public class QueryRunner extends OTIDatabase {
 	 */
 	public Object doBasicSearchForTrees(OTPropertyPredicate property, String searchValue, boolean isExactProperty, boolean isFulltextProperty) {
 
-		Set<Long> treeRootNodeIds = new HashSet<Long>();
+		HashMap<String, HashSet<Long>> treeRootNodeIdsForStudyId = new HashMap<String, HashSet<Long>>();
+		
+//		HashMap<String, HashMap<String, String>> treesFound = new HashMap<String, HashMap<String, String>>();
 	
    		// using fuzzy queries ... may want to use different queries for exact vs. fulltext indexes
 		FuzzyQuery fuzzyQuery = new FuzzyQuery(new Term(property.propertyName(), QueryParser.escape(searchValue.toLowerCase())),
@@ -115,32 +117,38 @@ public class QueryRunner extends OTIDatabase {
         	if (isExactProperty) {
 				hits = treeRootNodesByPropertyExact.query(fuzzyQuery);
 				for (Node hit : hits) {
-					treeRootNodeIds.add(hit.getId());
+					treeRootNodeIdsForStudyId.get((String) hit.getProperty(OTVocabularyPredicate.OT_STUDY_ID.propertyName())).add(hit.getId());
+					
 				}
         	}
         	if (isFulltextProperty) {
 				hits = treeRootNodesByPropertyFulltext.query(fuzzyQuery);
 				for (Node hit : hits) {
-					treeRootNodeIds.add(hit.getId());
+					treeRootNodeIdsForStudyId.get((String) hit.getProperty(OTVocabularyPredicate.OT_STUDY_ID.propertyName())).add(hit.getId());
 				}
         	}
         } finally {
 			hits.close();
 		}
         
-		List<HashMap<String, String>> treesFound = new LinkedList<HashMap<String,String>>();
+		HashMap<String, Object> treesFoundByStudy = new HashMap<String, Object>();
 
-		// record identifying information about the trees found
-		for (Long nid : treeRootNodeIds) {
-			Node hit = graphDb.getNodeById(nid);
+		// record identifying information about the trees found organized by study
+		for (String studyId : treeRootNodeIdsForStudyId.keySet()) {
+			
 			HashMap<String, String> treeResult = new HashMap<String, String>();
-			treeResult.put(OTINodeProperty.TREE_ID.propertyName(), (String) hit.getProperty(OTINodeProperty.TREE_ID.propertyName()));
-			treeResult.put(OTINodeProperty.NEXSON_ID.propertyName(), (String) hit.getProperty(OTINodeProperty.NEXSON_ID.propertyName())); 
-			treeResult.put(OTVocabularyPredicate.OT_STUDY_ID.propertyName(), (String) hit.getProperty(OTVocabularyPredicate.OT_STUDY_ID.propertyName()));
-			treesFound.add(treeResult);
+			
+			for (Long nodeId : treeRootNodeIdsForStudyId.get(studyId)) {
+				Node hit = graphDb.getNodeById(nodeId);
+				treeResult.put(OTINodeProperty.TREE_ID.propertyName(), (String) hit.getProperty(OTINodeProperty.TREE_ID.propertyName()));
+				treeResult.put(OTINodeProperty.NEXSON_ID.propertyName(), (String) hit.getProperty(OTINodeProperty.NEXSON_ID.propertyName())); 
+			}
+
+			treesFoundByStudy.put(OTVocabularyPredicate.OT_STUDY_ID.propertyName(), studyId);
+			treesFoundByStudy.put("matched_trees", treeResult);
 		}
 
-		return treesFound;
+		return treesFoundByStudy;
 	}
 	
 	/**
