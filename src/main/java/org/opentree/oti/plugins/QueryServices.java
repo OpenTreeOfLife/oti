@@ -155,7 +155,7 @@ public class QueryServices extends ServerPlugin {
 		
 		HashMap<String, Object> results = new HashMap<String, Object>();
 		if (searchProperty != null) {
-			results.put("results", runner.doBasicSearchForTrees(searchProperty, value, isExactProperty, isFulltextProperty));
+			results.put("matched_studies", runner.doBasicSearchForTrees(searchProperty, value, isExactProperty, isFulltextProperty));
 		} else {
 			results.put("error", "uncrecognized property: " + property);
 		}

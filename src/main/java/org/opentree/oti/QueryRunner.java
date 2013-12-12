@@ -141,9 +141,10 @@ public class QueryRunner extends OTIDatabase {
 		}
         
 		// record identifying information about the trees found, organized by study
-		HashMap<String, Object> treesFoundByStudy = new HashMap<String, Object>();
+		List<HashMap<String, Object>> treesFoundByStudy = new LinkedList<HashMap<String, Object>>();
 		for (String studyId : treeRootNodeIdsByStudyId.keySet()) {
-			
+
+			HashMap<String, Object> studyResult = new HashMap<String, Object>();
 			HashMap<String, String> treeResult = new HashMap<String, String>();
 			
 			for (Long nodeId : treeRootNodeIdsByStudyId.get(studyId)) {
@@ -152,8 +153,9 @@ public class QueryRunner extends OTIDatabase {
 				treeResult.put(OTINodeProperty.NEXSON_ID.propertyName(), (String) hit.getProperty(OTINodeProperty.NEXSON_ID.propertyName())); 
 			}
 
-			treesFoundByStudy.put(OTVocabularyPredicate.OT_STUDY_ID.propertyName(), studyId);
-			treesFoundByStudy.put("matched_trees", treeResult);
+			studyResult.put(OTVocabularyPredicate.OT_STUDY_ID.propertyName(), studyId);
+			studyResult.put("matched_trees", treeResult);
+			treesFoundByStudy.add(studyResult);
 		}
 
 		return treesFoundByStudy;
