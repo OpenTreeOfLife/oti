@@ -454,11 +454,10 @@ public class DatabaseManager extends OTIDatabase {
 		// add properties
 		setNodePropertiesFromMap(curGraphNode, curNexsonNode.getProperties());
 
-		if (curNexsonNode.getOTU() != null) {
+		if (curNexsonNode.getOTU() != null) { // if this fails we actually have invalid nexson, should probably disallow this case on nexson import
 			// TODO: sort this out, should not automatically assume the label is an ott id, need to check for this property
-			curGraphNode.setProperty(OTVocabularyPredicate.OT_OTT_TAXON_NAME.propertyName(), curNexsonNode.getOTU().getLabel()); 
+//			curGraphNode.setProperty(OTVocabularyPredicate.OT_OTT_TAXON_NAME.propertyName(), curNexsonNode.getOTU().getLabel()); 
 			connectTreeNodeToTaxonomy(curGraphNode);
-			
 			setNodePropertiesFromMap(curGraphNode, curNexsonNode.getOTU().getProperties());
 		}
 

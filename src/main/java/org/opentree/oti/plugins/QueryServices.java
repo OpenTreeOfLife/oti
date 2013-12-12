@@ -36,56 +36,62 @@ public class QueryServices extends ServerPlugin {
 			@Description("The property to be searched on. A list of searchable properties is available from the getSearchablePropertiesForStudies service.")
 				@Parameter(name = "property", optional = false) String property,
 			@Description("The value to be searched. This must be passed as a string, but will be converted to the datatype corresponding to the "
-					+ "specified searchable value.") @Parameter(name = "value", optional = false) String value) {
+					+ "specified searchable value.") @Parameter(name = "value", optional = false) String value,
+			@Description("Whether to perform exact matching ONLY. Defaults to false (fuzzy matching enabled).")
+				@Parameter(name="exact", optional = true) boolean matchExactOnly) {
 		
 		QueryRunner runner = new QueryRunner(graphDb);
-		boolean isExactProperty = false;
-		boolean isFulltextProperty = false;
+		boolean doExactSearch = false;
+		boolean doFulltextSearch = false;
 		OTPropertyPredicate searchProperty = null;
 
 		// check exact array properties
 		for (OTPropertyArray p : IndexedArrayProperties.STUDIES_EXACT.properties()) {
 			if (p.typeProperty.propertyName().equals(property)) {
 				searchProperty = p.typeProperty;
-				isExactProperty = true;
+				doExactSearch = true;
 				break;
 			}
 		}
 		
 		// specified property not exact array property, check for simple ones
-		if (!isExactProperty) {
+		if (!doExactSearch) {
 			for (OTPropertyPredicate p : IndexedPrimitiveProperties.STUDIES_EXACT.properties()) {
 				if (p.propertyName().equals(property)) {
 					searchProperty = p;
-					isExactProperty = true;
+					doExactSearch = true;
 					break;
 				}
 			}
 		}
 
-		// check fulltext array properties
-		for (OTPropertyArray p : IndexedArrayProperties.STUDIES_FULLTEXT.properties()) {
-			if (p.typeProperty.propertyName().equals(property)) {
-				searchProperty = p.typeProperty;
-				isFulltextProperty = true;
-				break;
-			}
-		}
-		
-		// specified property not fulltext array property, check for simple ones
-		if (!isFulltextProperty) {
-			for (OTPropertyPredicate p : IndexedPrimitiveProperties.STUDIES_FULLTEXT.properties()) {
-				if (p.propertyName().equals(property)) {
-					searchProperty = p;
-					isFulltextProperty = true;
+		// only use fulltext search if user hasn't designated exact matching only
+		if (matchExactOnly != true) {
+	
+			// check fulltext array properties
+			for (OTPropertyArray p : IndexedArrayProperties.STUDIES_FULLTEXT.properties()) {
+				if (p.typeProperty.propertyName().equals(property)) {
+					searchProperty = p.typeProperty;
+					doFulltextSearch = true;
 					break;
 				}
 			}
+			
+			// specified property not fulltext array property, check for simple ones
+			if (!doFulltextSearch) {
+				for (OTPropertyPredicate p : IndexedPrimitiveProperties.STUDIES_FULLTEXT.properties()) {
+					if (p.propertyName().equals(property)) {
+						searchProperty = p;
+						doFulltextSearch = true;
+						break;
+					}
+				}
+			}
 		}
-				
+		
 		HashMap<String, Object> results = new HashMap<String, Object>();
 		if (searchProperty != null) {
-			results.put("matched_studies", runner.doBasicSearchForStudies(searchProperty, value, isExactProperty, isFulltextProperty));
+			results.put("matched_studies", runner.doBasicSearchForStudies(searchProperty, value, doExactSearch, doFulltextSearch));
 		} else {
 			results.put("error", "uncrecognized property: " + property);
 		}
@@ -106,56 +112,62 @@ public class QueryServices extends ServerPlugin {
 			@Description("The property to be searched on. A list of searchable properties is available from the getSearchablePropertiesForTrees service.")
 				@Parameter(name = "property", optional = false) String property,
 			@Description("The value to be searched. This must be passed as a string, but will be converted to the datatype corresponding to the "
-					+ "specified searchable value.") @Parameter(name = "value", optional = false) String value) {
+					+ "specified searchable value.") @Parameter(name = "value", optional = false) String value,
+			@Description("Whether to perform exact matching ONLY. Defaults to false (fuzzy matching enabled).")
+				@Parameter(name="exact", optional = true) boolean matchExactOnly) {
 		
 		QueryRunner runner = new QueryRunner(graphDb);
-		boolean isExactProperty = false;
-		boolean isFulltextProperty = false;
+		boolean doExactSearch = false;
+		boolean doFulltextSearch = false;
 		OTPropertyPredicate searchProperty = null;
 
 		// check exact array properties
 		for (OTPropertyArray p : IndexedArrayProperties.TREES_EXACT.properties()) {
 			if (p.typeProperty.propertyName().equals(property)) {
 				searchProperty = p.typeProperty;
-				isExactProperty = true;
+				doExactSearch = true;
 				break;
 			}
 		}
 		
 		// specified property not exact array property, check for simple ones
-		if (!isExactProperty) {
+		if (!doExactSearch) {
 			for (OTPropertyPredicate p : IndexedPrimitiveProperties.TREES_EXACT.properties()) {
 				if (p.propertyName().equals(property)) {
 					searchProperty = p;
-					isExactProperty = true;
+					doExactSearch = true;
 					break;
 				}
 			}
 		}
 
-		// check fulltext array properties
-		for (OTPropertyArray p : IndexedArrayProperties.TREES_FULLTEXT.properties()) {
-			if (p.typeProperty.propertyName().equals(property)) {
-				searchProperty = p.typeProperty;
-				isFulltextProperty = true;
-				break;
-			}
-		}
-		
-		// specified property not fulltext array property, check for simple ones
-		if (!isFulltextProperty) {
-			for (OTPropertyPredicate p : IndexedPrimitiveProperties.TREES_FULLTEXT.properties()) {
-				if (p.propertyName().equals(property)) {
-					searchProperty = p;
-					isFulltextProperty = true;
+		// only use fulltext search if user hasn't designated exact matching only
+		if (matchExactOnly != true) {
+
+			// check fulltext array properties
+			for (OTPropertyArray p : IndexedArrayProperties.TREES_FULLTEXT.properties()) {
+				if (p.typeProperty.propertyName().equals(property)) {
+					searchProperty = p.typeProperty;
+					doFulltextSearch = true;
 					break;
+				}
+			}
+			
+			// specified property not fulltext array property, check for simple ones
+			if (!doFulltextSearch) {
+				for (OTPropertyPredicate p : IndexedPrimitiveProperties.TREES_FULLTEXT.properties()) {
+					if (p.propertyName().equals(property)) {
+						searchProperty = p;
+						doFulltextSearch = true;
+						break;
+					}
 				}
 			}
 		}
 		
 		HashMap<String, Object> results = new HashMap<String, Object>();
 		if (searchProperty != null) {
-			results.put("matched_studies", runner.doBasicSearchForTrees(searchProperty, value, isExactProperty, isFulltextProperty));
+			results.put("matched_studies", runner.doBasicSearchForTrees(searchProperty, value, doExactSearch, doFulltextSearch));
 		} else {
 			results.put("error", "uncrecognized property: " + property);
 		}
@@ -176,58 +188,62 @@ public class QueryServices extends ServerPlugin {
 			@Description("The property to be searched on. A list of searchable properties is available from the getSearchablePropertiesForTrees service.")
 				@Parameter(name = "property", optional = false) String property,
 			@Description("The value to be searched. This must be passed as a string, but will be converted to the datatype corresponding to the "
-					+ "specified searchable value.") @Parameter(name = "value", optional = false) String value) {
-		
-		// TODO: option to allow exact searching only
-		
+					+ "specified searchable value.") @Parameter(name = "value", optional = false) String value,
+			@Description("Whether to perform exact matching ONLY. Defaults to false (fuzzy matching enabled).")
+				@Parameter(name="exact", optional = true) boolean matchExactOnly) {
+				
 		QueryRunner runner = new QueryRunner(graphDb);
-		boolean isExactProperty = false;
-		boolean isFulltextProperty = false;
+		boolean doExactSearch = false;
+		boolean doFulltextSearch = false;
 		OTPropertyPredicate searchProperty = null;
 
 		// check exact array properties
 		for (OTPropertyArray p : IndexedArrayProperties.TREE_NODES_EXACT.properties()) {
 			if (p.typeProperty.propertyName().equals(property)) {
 				searchProperty = p.typeProperty;
-				isExactProperty = true;
+				doExactSearch = true;
 				break;
 			}
 		}
 		
 		// specified property not exact array property, check for simple ones
-		if (!isExactProperty) {
+		if (!doExactSearch) {
 			for (OTPropertyPredicate p : IndexedPrimitiveProperties.TREE_NODES_EXACT.properties()) {
 				if (p.propertyName().equals(property)) {
 					searchProperty = p;
-					isExactProperty = true;
+					doExactSearch = true;
 					break;
 				}
 			}
 		}
-
-		// check fulltext array properties
-		for (OTPropertyArray p : IndexedArrayProperties.TREE_NODES_FULLTEXT.properties()) {
-			if (p.typeProperty.propertyName().equals(property)) {
-				searchProperty = p.typeProperty;
-				isFulltextProperty = true;
-				break;
-			}
-		}
 		
-		// specified property not fulltext array property, check for simple ones
-		if (!isFulltextProperty) {
-			for (OTPropertyPredicate p : IndexedPrimitiveProperties.TREE_NODES_FULLTEXT.properties()) {
-				if (p.propertyName().equals(property)) {
-					searchProperty = p;
-					isFulltextProperty = true;
+		// only use fulltext search if user hasn't designated exact matching only
+		if (matchExactOnly != true) {
+			
+			// check fulltext array properties
+			for (OTPropertyArray p : IndexedArrayProperties.TREE_NODES_FULLTEXT.properties()) {
+				if (p.typeProperty.propertyName().equals(property)) {
+					searchProperty = p.typeProperty;
+					doFulltextSearch = true;
 					break;
+				}
+			}
+			
+			// specified property not fulltext array property, check for simple ones
+			if (!doFulltextSearch) {
+				for (OTPropertyPredicate p : IndexedPrimitiveProperties.TREE_NODES_FULLTEXT.properties()) {
+					if (p.propertyName().equals(property)) {
+						searchProperty = p;
+						doFulltextSearch = true;
+						break;
+					}
 				}
 			}
 		}
 		
 		HashMap<String, Object> results = new HashMap<String, Object>();
 		if (searchProperty != null) {
-			results.put("matched_studies", runner.doBasicSearchForTreeNodes(searchProperty, value, isExactProperty, isFulltextProperty));
+			results.put("matched_studies", runner.doBasicSearchForTreeNodes(searchProperty, value, doExactSearch, doFulltextSearch));
 		} else {
 			results.put("error", "uncrecognized property: " + property);
 		}

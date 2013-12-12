@@ -192,8 +192,6 @@ public class QueryRunner extends OTIDatabase {
 		if (isFulltextProperty) {
 			addTreeNodeSearchResultsTo(studyToTreeToMatchedTipMap, treeNodesByPropertyFulltext, fuzzyQuery);
 		}
-        
-//		LinkedList<HashMap <String, Object>> studiesFound = new LinkedList<HashMap <String, Object>>();
 		
 		// record identifying information about the trees found, organized by study
 		List<HashMap<String, Object>> treesFoundByStudy = new LinkedList<HashMap<String, Object>>();
