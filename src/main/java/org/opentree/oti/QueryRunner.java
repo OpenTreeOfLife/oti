@@ -105,8 +105,6 @@ public class QueryRunner extends OTIDatabase {
 	public Object doBasicSearchForTrees(OTPropertyPredicate property, String searchValue, boolean isExactProperty, boolean isFulltextProperty) {
 
 		HashMap<String, HashSet<Long>> treeRootNodeIdsForStudyId = new HashMap<String, HashSet<Long>>();
-		
-//		HashMap<String, HashMap<String, String>> treesFound = new HashMap<String, HashMap<String, String>>();
 	
    		// using fuzzy queries ... may want to use different queries for exact vs. fulltext indexes
 		FuzzyQuery fuzzyQuery = new FuzzyQuery(new Term(property.propertyName(), QueryParser.escape(searchValue.toLowerCase())),
@@ -118,7 +116,6 @@ public class QueryRunner extends OTIDatabase {
 				hits = treeRootNodesByPropertyExact.query(fuzzyQuery);
 				for (Node hit : hits) {
 					treeRootNodeIdsForStudyId.get((String) hit.getProperty(OTVocabularyPredicate.OT_STUDY_ID.propertyName())).add(hit.getId());
-					
 				}
         	}
         	if (isFulltextProperty) {
@@ -131,9 +128,8 @@ public class QueryRunner extends OTIDatabase {
 			hits.close();
 		}
         
+		// record identifying information about the trees found, organized by study
 		HashMap<String, Object> treesFoundByStudy = new HashMap<String, Object>();
-
-		// record identifying information about the trees found organized by study
 		for (String studyId : treeRootNodeIdsForStudyId.keySet()) {
 			
 			HashMap<String, String> treeResult = new HashMap<String, String>();
