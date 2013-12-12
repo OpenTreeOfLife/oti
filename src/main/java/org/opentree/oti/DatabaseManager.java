@@ -207,6 +207,7 @@ public class DatabaseManager extends OTIDatabase {
 
 		// add node properties
 		root.setProperty(OTINodeProperty.TREE_ID.propertyName(), treeId);
+		root.setProperty(OTINodeProperty.NEXSON_ID.propertyName(), tree.getId());
 		setNodePropertiesFromMap(root, tree.getProperties());
 
 		// gather information about the taxa represented in this tree
@@ -446,16 +447,24 @@ public class DatabaseManager extends OTIDatabase {
 			curGraphNode.setProperty(OTINodeProperty.INGROUP_START_NODE_ID.propertyName(), true);
 			lastObservedIngroupStartNode = curGraphNode;
 		}
+		
+		// set nexson id
+		curGraphNode.setProperty(OTINodeProperty.NEXSON_ID.propertyName(), curNexsonNode.getId());		
 				
 		// add properties
+		setNodePropertiesFromMap(curGraphNode, curNexsonNode.getProperties());
+
 		if (curNexsonNode.getOTU() != null) {
-			curGraphNode.setProperty(OTVocabularyPredicate.OT_OTT_TAXON_NAME.propertyName(), curNexsonNode.getOTU().getLabel());
-			setNodePropertiesFromMap(curGraphNode, curNexsonNode.getProperties());
+			// TODO: sort this out, should not automatically assume the label is an ott id, need to check for this property
+			curGraphNode.setProperty(OTVocabularyPredicate.OT_OTT_TAXON_NAME.propertyName(), curNexsonNode.getOTU().getLabel()); 
+			connectTreeNodeToTaxonomy(curGraphNode);
+			
+			setNodePropertiesFromMap(curGraphNode, curNexsonNode.getOTU().getProperties());
 		}
 
 		if (curNexsonNode.getParentBranchLength() != null) {
 			curGraphNode.setProperty(OTINodeProperty.PARENT_BRANCH_LENGTH.propertyName(), curNexsonNode.getParentBranchLength());
-		}
+		}		
 		
 		if (parentGraphNode != null) {
 			curGraphNode.createRelationshipTo(parentGraphNode, OTIRelType.CHILDOF);
@@ -463,10 +472,6 @@ public class DatabaseManager extends OTIDatabase {
 
 		for (JadeNode childJadeNode : curJadeNode.getChildren()) {
 			preorderAddTreeToDB(childJadeNode, curGraphNode);
-		}
-
-		if (curNexsonNode.getOTU() != null) {
-			connectTreeNodeToTaxonomy(curGraphNode);
 		}
 
 		indexer.addTreeNodeToIndexes(curGraphNode);

@@ -81,35 +81,6 @@ public class QueryRunner extends OTIDatabase {
         } finally {
 			hits.close();
 		}
-		
-		/*
-		if (isExactProperty) { // use exact query
-			TermQuery exactQuery = new TermQuery(new Term(property.propertyName(), searchValue));
-			IndexHits<Node> hits = studyMetaNodesByPropertyExact.query(exactQuery);
-			
-			try {
-				for (Node hit : hits) {
-					studyIds.add((String) hit.getProperty(OTVocabularyPredicate.OT_STUDY_ID.propertyName()));
-				}
-			} finally {
-				hits.close();
-			}
-		}
-        
-		if (isFulltextProperty) { // use fuzzy query
-    		FuzzyQuery fuzzyQuery = new FuzzyQuery(new Term(property.propertyName(), QueryParser.escape(searchValue.toLowerCase())),
-        			AbstractBaseQuery.getMinIdentity(searchValue));
-			IndexHits<Node> hits = studyMetaNodesByPropertyExact.query(fuzzyQuery);
-
-    		try {
-        		hits = studyMetaNodesByPropertyFulltext.query(fuzzyQuery);
-        		for (Node hit : hits) {
-        			studyIds.add((String) hit.getProperty(OTVocabularyPredicate.OT_STUDY_ID.propertyName()));
-        		}
-    		} finally {
-        		hits.close();
-        	}
-    	} */
 			
 		List<HashMap<String, String>> studiesFound = new LinkedList<HashMap<String,String>>();
 		for (Long nid : studyMetaNodeIds) {
