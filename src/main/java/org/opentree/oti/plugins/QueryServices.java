@@ -68,6 +68,8 @@ public class QueryServices extends ServerPlugin {
 		// only use fulltext search if user hasn't designated exact matching only
 		if (! Boolean.TRUE.equals(doFuzzyMatching)) { // condition passes for matchExactOnly == false && matchExactOnly == null
 			
+			// test line
+			
 			// check fulltext array properties
 			for (OTPropertyArray p : IndexedArrayProperties.STUDIES_FULLTEXT.properties()) {
 				if (p.typeProperty.propertyName().equals(property)) {
