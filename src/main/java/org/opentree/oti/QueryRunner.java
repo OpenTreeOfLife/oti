@@ -189,15 +189,17 @@ public class QueryRunner extends OTIDatabase {
         	if (isExactProperty) {
         		hits = treeNodesByPropertyExact.query(fuzzyQuery);
 				for (Node hit : hits) {
-			
+
+					Node treeRootNode = OTIDatabaseUtils.getRootOfTreeContaining(hit);
+					String studyId = (String) treeRootNode.getProperty(OTVocabularyPredicate.OT_STUDY_ID.propertyName());
+					Long treeRootNodeId = treeRootNode.getId();
+					
 					// add an entry for the study if this is the first time we've seen it
-					String studyId = (String) hit.getProperty(OTVocabularyPredicate.OT_STUDY_ID.propertyName());
 					if (!studyToTreeToMatchedTipMap.containsKey(studyId)) {
 						studyToTreeToMatchedTipMap.put(studyId, new HashMap<Long, HashSet<Long>>());
 					}
 
 					// add an entry for the tree if this is the first time we've seen it
-					Long treeRootNodeId = OTIDatabaseUtils.getRootOfTreeContaining(hit).getId();
 					if (!studyToTreeToMatchedTipMap.get(studyId).containsKey(treeRootNodeId)) {
 						studyToTreeToMatchedTipMap.get(studyId).put(treeRootNodeId, new HashSet<Long>());
 					}
@@ -210,14 +212,16 @@ public class QueryRunner extends OTIDatabase {
         		hits = treeNodesByPropertyFulltext.query(fuzzyQuery);
 				for (Node hit : hits) {
 					
+					Node treeRootNode = OTIDatabaseUtils.getRootOfTreeContaining(hit);
+					String studyId = (String) treeRootNode.getProperty(OTVocabularyPredicate.OT_STUDY_ID.propertyName());
+					Long treeRootNodeId = treeRootNode.getId();
+					
 					// add an entry for the study if this is the first time we've seen it
-					String studyId = (String) hit.getProperty(OTVocabularyPredicate.OT_STUDY_ID.propertyName());
 					if (!studyToTreeToMatchedTipMap.containsKey(studyId)) {
 						studyToTreeToMatchedTipMap.put(studyId, new HashMap<Long, HashSet<Long>>());
 					}
 
 					// add an entry for the tree if this is the first time we've seen it
-					Long treeRootNodeId = OTIDatabaseUtils.getRootOfTreeContaining(hit).getId();
 					if (!studyToTreeToMatchedTipMap.get(studyId).containsKey(treeRootNodeId)) {
 						studyToTreeToMatchedTipMap.get(studyId).put(treeRootNodeId, new HashSet<Long>());
 					}
