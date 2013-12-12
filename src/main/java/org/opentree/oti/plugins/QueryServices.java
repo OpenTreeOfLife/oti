@@ -38,7 +38,7 @@ public class QueryServices extends ServerPlugin {
 			@Description("The value to be searched. This must be passed as a string, but will be converted to the datatype corresponding to the "
 					+ "specified searchable value.") @Parameter(name = "value", optional = false) String value,
 			@Description("Whether to perform exact matching ONLY. Defaults to false (fuzzy matching enabled).")
-				@Parameter(name="exact", optional = true) boolean matchExactOnly) {
+				@Parameter(name="exact", optional = true) Boolean matchExactOnly) {
 		
 		QueryRunner runner = new QueryRunner(graphDb);
 		boolean doExactSearch = false;
@@ -114,7 +114,7 @@ public class QueryServices extends ServerPlugin {
 			@Description("The value to be searched. This must be passed as a string, but will be converted to the datatype corresponding to the "
 					+ "specified searchable value.") @Parameter(name = "value", optional = false) String value,
 			@Description("Whether to perform exact matching ONLY. Defaults to false (fuzzy matching enabled).")
-				@Parameter(name="exact", optional = true) boolean matchExactOnly) {
+				@Parameter(name="exact", optional = true) Boolean matchExactOnly) {
 		
 		QueryRunner runner = new QueryRunner(graphDb);
 		boolean doExactSearch = false;
@@ -190,7 +190,7 @@ public class QueryServices extends ServerPlugin {
 			@Description("The value to be searched. This must be passed as a string, but will be converted to the datatype corresponding to the "
 					+ "specified searchable value.") @Parameter(name = "value", optional = false) String value,
 			@Description("Whether to perform exact matching ONLY. Defaults to false (fuzzy matching enabled).")
-				@Parameter(name="exact", optional = true) boolean matchExactOnly) {
+				@Parameter(name="exact", optional = true) Boolean matchExactOnly) {
 				
 		QueryRunner runner = new QueryRunner(graphDb);
 		boolean doExactSearch = false;
