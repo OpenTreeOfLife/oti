@@ -32,7 +32,12 @@ public enum OTINodeProperty implements OTPropertyPredicate {
 	 * The native neo4j id of the graph node.
 	 */
 	NODE_ID ("id", Long.class),
-		
+	
+	/**
+	 * For studies or trees marked as deprecated.
+	 */
+	IS_DEPRECATED ("is_deprecated", boolean.class),
+	
 	// ===== tree root nodes
 
 	/**

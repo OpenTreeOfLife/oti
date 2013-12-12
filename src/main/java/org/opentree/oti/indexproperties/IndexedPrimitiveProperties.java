@@ -20,6 +20,7 @@ public enum IndexedPrimitiveProperties {
 					OTVocabularyPredicate.OT_STUDY_PUBLICATION,
 					OTVocabularyPredicate.OT_TAG,
 					OTVocabularyPredicate.OT_YEAR,
+					OTINodeProperty.IS_DEPRECATED,
 	}),
 	
 	STUDIES_FULLTEXT (
@@ -40,6 +41,7 @@ public enum IndexedPrimitiveProperties {
 					OTVocabularyPredicate.OT_STUDY_ID,
 					OTVocabularyPredicate.OT_TAG,
 					OTINodeProperty.TREE_ID,
+					OTINodeProperty.IS_DEPRECATED,
 	}),
 	
 	TREES_FULLTEXT (

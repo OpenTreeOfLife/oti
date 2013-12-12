@@ -14,6 +14,7 @@ import org.neo4j.server.plugins.*;
 import org.neo4j.server.rest.repr.OTRepresentationConverter;
 import org.neo4j.server.rest.repr.Representation;
 import org.opentree.properties.OTPropertyPredicate;
+import org.opentree.properties.OTVocabularyPredicate;
 
 /**
  * Search services for the oti nexson database.
@@ -169,7 +170,7 @@ public class QueryServices extends ServerPlugin {
 	 * @param value
 	 * @return
 	 */
-	@Description("Perform a simple search for trees in indexed studies")
+	@Description("Perform a simple search for trees nodes (currently only supports tip nodes) in indexed studies")
 	@PluginTarget(GraphDatabaseService.class)
 	public Representation singlePropertySearchForTreeNodes(@Source GraphDatabaseService graphDb,
 			@Description("The property to be searched on. A list of searchable properties is available from the getSearchablePropertiesForTrees service.")

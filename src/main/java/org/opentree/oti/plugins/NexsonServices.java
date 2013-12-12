@@ -1,12 +1,5 @@
 package org.opentree.oti.plugins;
 
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.server.plugins.Description;
-import org.neo4j.server.plugins.Parameter;
-import org.neo4j.server.plugins.PluginTarget;
-import org.neo4j.server.plugins.Source;
-import org.opentree.exceptions.TreeNotFoundException;
-import org.opentree.oti.QueryRunner;
 
 /**
  * Space for other services, such as getting information about nexson properties, etc. Currently not necessary.

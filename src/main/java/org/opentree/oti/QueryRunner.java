@@ -5,12 +5,15 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import opentree.tnrs.queries.AbstractBaseQuery;
 
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryParser.QueryParser;
+import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.FuzzyQuery;
+import org.apache.lucene.search.TermQuery;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.index.Index;
@@ -53,34 +56,69 @@ public class QueryRunner extends OTIDatabase {
 	 */
 	public Object doBasicSearchForStudies(OTPropertyPredicate property, String searchValue, boolean isExactProperty, boolean isFulltextProperty) {
 
-		HashMap<String, String> studiesFound = new HashMap<String, String>();
+		Set<Long> studyMetaNodeIds = new HashSet<Long>();
+
+		// TODO: need something to allow searching on property types other than strings
 
    		// using fuzzy queries ... may want to use different queries for exact vs. fulltext indexes
 		FuzzyQuery fuzzyQuery = new FuzzyQuery(new Term(property.propertyName(), QueryParser.escape(searchValue.toLowerCase())),
     			AbstractBaseQuery.getMinIdentity(searchValue));
-		IndexHits<Node> hits = studyMetaNodesByPropertyExact.query(fuzzyQuery);
+		IndexHits<Node> hits = null;
 
-		try {
+        try {
         	if (isExactProperty) {
 				hits = studyMetaNodesByPropertyExact.query(fuzzyQuery);
 				for (Node hit : hits) {
-					studiesFound.put(
-							OTVocabularyPredicate.OT_STUDY_ID.propertyName(),
-							(String) hit.getProperty(OTVocabularyPredicate.OT_STUDY_ID.propertyName()));
+					studyMetaNodeIds.add(hit.getId());
 				}
         	}
         	if (isFulltextProperty) {
-        		hits = studyMetaNodesByPropertyFulltext.query(fuzzyQuery);
-        		for (Node hit : hits) {
-        			studiesFound.put(
-							OTVocabularyPredicate.OT_STUDY_ID.propertyName(),
-							(String) hit.getProperty(OTVocabularyPredicate.OT_STUDY_ID.propertyName()));
-        		}
+				hits = studyMetaNodesByPropertyFulltext.query(fuzzyQuery);
+				for (Node hit : hits) {
+					studyMetaNodeIds.add(hit.getId());
+				}
         	}
-		} finally {
+        } finally {
 			hits.close();
 		}
+		
+		/*
+		if (isExactProperty) { // use exact query
+			TermQuery exactQuery = new TermQuery(new Term(property.propertyName(), searchValue));
+			IndexHits<Node> hits = studyMetaNodesByPropertyExact.query(exactQuery);
+			
+			try {
+				for (Node hit : hits) {
+					studyIds.add((String) hit.getProperty(OTVocabularyPredicate.OT_STUDY_ID.propertyName()));
+				}
+			} finally {
+				hits.close();
+			}
+		}
         
+		if (isFulltextProperty) { // use fuzzy query
+    		FuzzyQuery fuzzyQuery = new FuzzyQuery(new Term(property.propertyName(), QueryParser.escape(searchValue.toLowerCase())),
+        			AbstractBaseQuery.getMinIdentity(searchValue));
+			IndexHits<Node> hits = studyMetaNodesByPropertyExact.query(fuzzyQuery);
+
+    		try {
+        		hits = studyMetaNodesByPropertyFulltext.query(fuzzyQuery);
+        		for (Node hit : hits) {
+        			studyIds.add((String) hit.getProperty(OTVocabularyPredicate.OT_STUDY_ID.propertyName()));
+        		}
+    		} finally {
+        		hits.close();
+        	}
+    	} */
+			
+		List<HashMap<String, String>> studiesFound = new LinkedList<HashMap<String,String>>();
+		for (Long nid : studyMetaNodeIds) {
+			HashMap<String,String> study = new HashMap<String,String>();
+			study.put(OTVocabularyPredicate.OT_STUDY_ID.propertyName(),
+					(String) graphDb.getNodeById(nid).getProperty(OTVocabularyPredicate.OT_STUDY_ID.propertyName()));
+			studiesFound.add(study);
+		}
+
 		return studiesFound;
 	}
 	
@@ -95,7 +133,7 @@ public class QueryRunner extends OTIDatabase {
 	 */
 	public Object doBasicSearchForTrees(OTPropertyPredicate property, String searchValue, boolean isExactProperty, boolean isFulltextProperty) {
 
-		HashSet<Long> treeRootNodeIds = new HashSet<Long>();
+		Set<Long> treeRootNodeIds = new HashSet<Long>();
 	
    		// using fuzzy queries ... may want to use different queries for exact vs. fulltext indexes
 		FuzzyQuery fuzzyQuery = new FuzzyQuery(new Term(property.propertyName(), QueryParser.escape(searchValue.toLowerCase())),
@@ -119,7 +157,7 @@ public class QueryRunner extends OTIDatabase {
 			hits.close();
 		}
         
-		LinkedList<HashMap<String, String>> treesFound = new LinkedList<HashMap<String,String>>();
+		List<HashMap<String, String>> treesFound = new LinkedList<HashMap<String,String>>();
 
 		// record identifying information about the trees found
 		for (Long nid : treeRootNodeIds) {
@@ -145,7 +183,7 @@ public class QueryRunner extends OTIDatabase {
 	 */
 	public Object doBasicSearchForTreeNodes(OTPropertyPredicate property, String searchValue, boolean isExactProperty, boolean isFulltextProperty) {
 
-		HashMap<Long, HashSet<Long>> treeRootNodeIdToMatchedTipNodeIdMap = new HashMap<Long, HashSet<Long>>();
+		Map<Long, HashSet<Long>> treeRootNodeIdToMatchedTipNodeIdMap = new HashMap<Long, HashSet<Long>>();
 	
    		// using fuzzy queries ... may want to use different queries for exact vs. fulltext indexes
 		FuzzyQuery fuzzyQuery = new FuzzyQuery(new Term(property.propertyName(), QueryParser.escape(searchValue.toLowerCase())),

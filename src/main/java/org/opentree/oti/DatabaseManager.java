@@ -125,6 +125,7 @@ public class DatabaseManager extends OTIDatabase {
 			// create the study
 			studyMeta = graphDb.createNode();
 			studyMeta.setProperty(OTINodeProperty.IS_STUDY_META.propertyName(), true);
+			studyMeta.setProperty(OTINodeProperty.IS_DEPRECATED.propertyName(), study.isDeprecated());
 			
 			// set studyproperties
 			setNodePropertiesFromMap(studyMeta, study.getProperties());
@@ -188,6 +189,7 @@ public class DatabaseManager extends OTIDatabase {
 
 		// add the tree to the graph
 		Node root = preorderAddTreeToDB(tree.getRoot(), null);
+		root.setProperty(OTINodeProperty.IS_DEPRECATED.propertyName(), tree.isDeprecated());
 		
 		// set this property now so that get root traversals will work
 		root.setProperty(OTINodeProperty.IS_ROOT.propertyName(), true);			
