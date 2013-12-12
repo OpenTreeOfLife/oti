@@ -62,6 +62,9 @@ public class QueryRunner extends OTIDatabase {
 		// TODO: need something to allow searching on property types other than strings
 
    		// using fuzzy queries ... may want to use different queries for exact vs. fulltext indexes
+		
+		// TODO: this does not work when doing exact queries. probably need to define a term query for those. going to need work
+		
 		FuzzyQuery fuzzyQuery = new FuzzyQuery(new Term(property.propertyName(), QueryParser.escape(searchValue.toLowerCase())),
     			AbstractBaseQuery.getMinIdentity(searchValue));
 		IndexHits<Node> hits = null;
@@ -109,6 +112,9 @@ public class QueryRunner extends OTIDatabase {
 		HashMap<String, HashSet<Long>> treeRootNodeIdsByStudyId = new HashMap<String, HashSet<Long>>();
 	
    		// using fuzzy queries ... may want to use different queries for exact vs. fulltext indexes
+		
+		// TODO: this does not work when doing exact queries. probably need to define a term query for those. going to need work
+		
 		FuzzyQuery fuzzyQuery = new FuzzyQuery(new Term(property.propertyName(), QueryParser.escape(searchValue.toLowerCase())),
     			AbstractBaseQuery.getMinIdentity(searchValue));
 
@@ -182,6 +188,9 @@ public class QueryRunner extends OTIDatabase {
 		Map<String, HashMap<Long, HashSet<Long>>> studyToTreeToMatchedTipMap = new HashMap<String, HashMap<Long, HashSet<Long>>>();
 	
    		// using fuzzy queries ... may want to use different queries for exact vs. fulltext indexes
+		
+		// TODO: this does not work when doing exact queries. probably need to define a term query for those. going to need work
+
 		FuzzyQuery fuzzyQuery = new FuzzyQuery(new Term(property.propertyName(), QueryParser.escape(searchValue.toLowerCase())),
 				AbstractBaseQuery.getMinIdentity(searchValue));
 
