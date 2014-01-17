@@ -53,7 +53,7 @@ public class IndexServices extends ServerPlugin {
 	 * @throws IOException
 	 * @throws DuplicateSourceException 
 	 */
-	@Description("DEPRECATED. Use `indexNexsons` instead.")
+	@Description("DEPRECATED. Use `indexNexsons` instead. For compatibility, this *ALWAYS RETURNS* true. indexNexsons will provide more meaningful results.")
 	@PluginTarget(GraphDatabaseService.class)
 	@Deprecated
 	public Representation indexSingleNexson(@Source GraphDatabaseService graphDb,
@@ -68,7 +68,9 @@ public class IndexServices extends ServerPlugin {
 			}
 		}
 
-		return indexNexsons(graphDb, urls);
+		indexNexsons(graphDb, urls);
+
+		return OpentreeRepresentationConverter.convert(true);
 	
 	}
 
