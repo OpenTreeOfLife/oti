@@ -89,6 +89,10 @@ public class IndexServices extends ServerPlugin {
 	public Representation indexNexsons(@Source GraphDatabaseService graphDb,
 			@Description("remote nexson urls") @Parameter(name = "urls", optional = false) String[] urls) throws MalformedURLException, IOException {
 
+		if (urls.length < 1) {
+			throw new IllegalArgumentException("You must provide at least one url for a nexson document to be indexed.");
+		}
+		
 		ArrayList<String> results = new ArrayList<String>(urls.length);
 		
 		DatabaseManager manager = new DatabaseManager(graphDb);
