@@ -57,19 +57,10 @@ public class IndexServices extends ServerPlugin {
 	@PluginTarget(GraphDatabaseService.class)
 	@Deprecated
 	public Representation indexSingleNexson(@Source GraphDatabaseService graphDb,
-			@Description("remote nexson url") @Parameter(name = "url", optional = true) String url,
-			@Description("remote nexson urls") @Parameter(name = "urls", optional = true) String[] urls) throws MalformedURLException, IOException {
+			@Description("remote nexson url") @Parameter(name = "url", optional = false) String url) throws MalformedURLException, IOException {
 
-		if (urls == null) {
-			if (url != null) {
-				urls = new String[] {url};
-			} else {
-				throw new IllegalArgumentException("At least one of the parameters `url` or `urls` must be set.");
-			}
-		}
-
+		String[] urls = new String[] {url};
 		indexNexsons(graphDb, urls);
-
 		return OpentreeRepresentationConverter.convert(true);
 	
 	}
