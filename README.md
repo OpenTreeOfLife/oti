@@ -45,13 +45,25 @@ Using OTI
 
 ####Indexing
 
-For OTI to be useful, you will need to index some nexsons. The "IndexSingleNexson" service provides a method to do that. It accepts a single parameter, which is the url of the nexson file to be indexed. A single nexson study is assumed to be contained within a single nexson file. For more information:
+For OTI to be useful, you will need to index some nexsons. The "indexNexsons"
+service provides a method to do that. It accepts a single parameter ```urls```,
+which is a list of urls of nexson files to be indexed. A single nexson study is
+assumed to be contained within a single nexson file. For more information:
+
+```
+curl -v http://localhost:7474/db/data/ext/IndexServices/graphdb/indexNexsons
+```
+
+There is a deprecated indexing service that only indexes a single NexSON URL at
+a time:
 
 ```
 curl -v http://localhost:7474/db/data/ext/IndexServices/graphdb/indexSingleNexson
 ```
 
-A python script is provided to facilitate indexing all studies in the most recent commit to master in the treenexus repo. It takes no arguments:
+It should no longer be used and the ```indexNexsons``` service should be used instead.
+
+A python script is provided to facilitate indexing all studies in the most recent commit to master in the [phylesystem](https://github.com/OpenTreeOfLife/phylesystem) repo. It takes no arguments:
 
 ```
 python index_current_repo.py
