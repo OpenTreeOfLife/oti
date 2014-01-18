@@ -4,7 +4,7 @@ import json, requests, sys
 
 def submit_request(data):
 	'''Send a request to oti to index a single study. URL is set to default neo4j location'''
-	url = oti_url + "ext/IndexServices/graphdb/indexSingleNexson"
+	url = oti_url + "ext/IndexServices/graphdb/indexNexsons"
 	r = requests.post(url,
 					  data=json.dumps(data),
 					  headers={'Content-type': 'application/json'});
@@ -18,9 +18,9 @@ else:
 	oti_url = "http://localhost:7474/db/data/"
 
 if len(sys.argv) > 2:
-	oti_repo = sys.argv[2]	# maybe 'treenexus_test'
+	oti_repo = sys.argv[2]	# maybe 'phylesystem_test'
 else:
-	oti_repo = 'treenexus'
+	oti_repo = 'phylesystem'
 files_base_url = "https://raw.github.com/OpenTreeOfLife/%s/master"%(oti_repo)
 
 if len(sys.argv) > 3:
@@ -49,16 +49,16 @@ for study in study_list:
 	study_id = study["name"]
 	url = make_url(study_id)
 	print "Indexing %s study %s from %s"%(oti_repo, study_id, url)
-	submit_request({"url" : url})
+	submit_request({"urls" : [url] })
 
 
 # additional code that is not currently used but may come in handy below here
 
 # access the commits
-#commits_url = "https://api.github.com/repos/OpenTreeOfLife/treenexus/commits"
+#commits_url = "https://api.github.com/repos/OpenTreeOfLife/phylesystem/commits"
 #commits = urllib2.urlopen(commits_url)
 #commits_json = json.loads(commits.read())
 #most_recent_commit_sha = commits_json[0]["sha"]
 
 # example url for accessing study from a single commit
-# https://raw.github.com/OpenTreeOfLife/treenexus/5762c8194c718e22bcf17d53818477320be3658d/study/10/10.json
+# https://raw.github.com/OpenTreeOfLife/phylesystem/5762c8194c718e22bcf17d53818477320be3658d/study/10/10.json
