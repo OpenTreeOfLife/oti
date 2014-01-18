@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import opentree.tnrs.queries.AbstractBaseQuery;
-
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.search.BooleanQuery;
@@ -24,6 +22,7 @@ import org.opentree.graphdb.GraphDatabaseAgent;
 import org.opentree.oti.indexproperties.OTINodeProperty;
 import org.opentree.properties.OTPropertyPredicate;
 import org.opentree.properties.OTVocabularyPredicate;
+import org.opentree.tnrs.queries.AbstractBaseQuery;
 
 public class QueryRunner extends OTIDatabase {
 	

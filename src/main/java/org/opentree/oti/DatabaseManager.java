@@ -12,9 +12,7 @@ import java.util.Map.Entry;
 
 import jade.tree.JadeNode;
 import jade.tree.JadeTree;
-import opentree.taxonomy.contexts.TaxonomyNodeIndex;
 
-import org.opentree.GeneralUtils;
 import org.opentree.graphdb.DatabaseUtils;
 import org.opentree.graphdb.GraphDatabaseAgent;
 import org.opentree.nexson.io.NexsonNode;
@@ -28,6 +26,8 @@ import org.opentree.oti.indexproperties.IndexedPrimitiveProperties;
 import org.opentree.oti.indexproperties.OTINodeProperty;
 import org.opentree.properties.BasicType;
 import org.opentree.properties.OTVocabularyPredicate;
+import org.opentree.taxonomy.contexts.TaxonomyNodeIndex;
+import org.opentree.utils.GeneralUtils;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
