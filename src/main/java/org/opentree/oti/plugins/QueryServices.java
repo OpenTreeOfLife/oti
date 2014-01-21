@@ -42,6 +42,9 @@ public class QueryServices extends ServerPlugin {
 			@Description("Whether or not to include all metadata. By default, only the nexson ids of elements will be returned.")
 				@Parameter(name = "verbose", optional = true) Boolean verbose) {
 		
+		return OTRepresentationConverter.convert(verbose);
+		
+		/*
 		QueryRunner runner = new QueryRunner(graphDb);
 		boolean doExactSearch = false;
 		boolean doFulltextSearch = false;
@@ -72,7 +75,7 @@ public class QueryServices extends ServerPlugin {
 			
 			// test line
 			
-			// check fulltext array properties
+			// check if specified property is a fulltext array property
 			for (OTPropertyArray p : IndexedArrayProperties.STUDIES_FULLTEXT.properties()) {
 				if (p.typeProperty.propertyName().equals(property)) {
 					searchProperty = p.typeProperty;
@@ -81,7 +84,7 @@ public class QueryServices extends ServerPlugin {
 				}
 			}
 			
-			// specified property not fulltext array property, check for simple ones
+			// specified property not fulltext array property, check for simple fulltext properties
 			if (!doFulltextSearch) {
 				for (OTPropertyPredicate p : IndexedPrimitiveProperties.STUDIES_FULLTEXT.properties()) {
 					if (p.propertyName().equals(property)) {
@@ -105,7 +108,7 @@ public class QueryServices extends ServerPlugin {
 			results.put("error", "uncrecognized property: " + property);
 		}
 		
-		return OTRepresentationConverter.convert(results);
+		return OTRepresentationConverter.convert(results); */
 	}
 	
 	/**
