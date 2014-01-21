@@ -38,13 +38,12 @@ public class QueryServices extends ServerPlugin {
 			@Description("The value to be searched. This must be passed as a string, but will be converted to the datatype corresponding to the "
 					+ "specified searchable value.") @Parameter(name = "value", optional = false) String value,
 			@Description("Whether to perform exact matching ONLY. Defaults to false, i.e. fuzzy matching is enabled. Only applicable for some string properties.")
-				@Parameter(name="exact", optional = true) Boolean doFuzzyMatching,
+				@Parameter(name="exact", optional = true) Boolean exact,
 			@Description("Whether or not to include all metadata. By default, only the nexson ids of elements will be returned.")
 				@Parameter(name = "verbose", optional = true) Boolean verbose) {
 		
-		return OTRepresentationConverter.convert(verbose);
+//		return OTRepresentationConverter.convert(verbose);
 		
-		/*
 		QueryRunner runner = new QueryRunner(graphDb);
 		boolean doExactSearch = false;
 		boolean doFulltextSearch = false;
@@ -70,8 +69,18 @@ public class QueryServices extends ServerPlugin {
 			}
 		}
 		
+		// ensure that `verbose` is not set to null
+		if (verbose == null) {
+			verbose = false;
+		}
+
+		// ensure that `doFuzzyMatching` is not set to null
+		if (exact == null) {
+			exact = false;
+		}
+		
 		// only use fulltext search if user hasn't designated exact matching only
-		if (! Boolean.TRUE.equals(doFuzzyMatching)) { // true if matchExactOnly == false || matchExactOnly == null
+		if (! exact) {
 			
 			// test line
 			
@@ -95,12 +104,7 @@ public class QueryServices extends ServerPlugin {
 				}
 			}
 		}
-		
-		// ensure that `verbose` is not set to null
-		if (! Boolean.TRUE.equals(verbose)) { // true if verbose == false || verbose == null
-			verbose = false;
-		}
-		
+				
 		HashMap<String, Object> results = new HashMap<String, Object>();
 		if (searchProperty != null) {
 			results.put("matched_studies", runner.doBasicSearchForStudies(searchProperty, value, doExactSearch, doFulltextSearch, verbose));
@@ -108,7 +112,7 @@ public class QueryServices extends ServerPlugin {
 			results.put("error", "uncrecognized property: " + property);
 		}
 		
-		return OTRepresentationConverter.convert(results); */
+		return OTRepresentationConverter.convert(results);
 	}
 	
 	/**

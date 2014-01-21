@@ -95,9 +95,12 @@ public class QueryRunner extends OTIDatabase {
 			study.put(OTVocabularyPredicate.OT_STUDY_ID.propertyName(),
 					(String) studyNode.getProperty(OTVocabularyPredicate.OT_STUDY_ID.propertyName()));
 			
-			for (OTPropertyPredicate p : IndexedPrimitiveProperties.STUDIES_EXACT.properties()) {
-				if (studyNode.hasProperty(p.propertyName())) {
-					study.put(p.propertyName(), studyNode.getProperty(p.propertyName()));
+			// provide additional metadata if requested
+			if (verbose) {
+				for (OTPropertyPredicate p : IndexedPrimitiveProperties.STUDIES_EXACT.properties()) {
+					if (studyNode.hasProperty(p.propertyName())) {
+						study.put(p.propertyName(), studyNode.getProperty(p.propertyName()));
+					}
 				}
 			}
 			
