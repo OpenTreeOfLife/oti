@@ -19,6 +19,7 @@ import org.neo4j.graphdb.index.Index;
 import org.neo4j.graphdb.index.IndexHits;
 import org.neo4j.kernel.EmbeddedGraphDatabase;
 import org.opentree.graphdb.GraphDatabaseAgent;
+import org.opentree.oti.indexproperties.IndexedPrimitiveProperties;
 import org.opentree.oti.indexproperties.OTINodeProperty;
 import org.opentree.properties.OTPropertyPredicate;
 import org.opentree.properties.OTVocabularyPredicate;
@@ -54,7 +55,7 @@ public class QueryRunner extends OTIDatabase {
 	 * @return
 	 * 		A list of strings containing the node ids of the source meta nodes for sources found during search
 	 */
-	public Object doBasicSearchForStudies(OTPropertyPredicate property, String searchValue, boolean isExactProperty, boolean isFulltextProperty) {
+	public Object doBasicSearchForStudies(OTPropertyPredicate property, String searchValue, boolean isExactProperty, boolean isFulltextProperty, boolean verbose) {
 
 		Set<Long> studyMetaNodeIds = new HashSet<Long>();
 
@@ -85,11 +86,21 @@ public class QueryRunner extends OTIDatabase {
 			hits.close();
 		}
 			
-		List<HashMap<String, String>> studiesFound = new LinkedList<HashMap<String,String>>();
+		List<HashMap<String, Object>> studiesFound = new LinkedList<HashMap<String, Object>>();
 		for (Long nid : studyMetaNodeIds) {
-			HashMap<String,String> study = new HashMap<String,String>();
+
+			Node studyNode = graphDb.getNodeById(nid);
+
+			HashMap<String, Object> study = new HashMap<String, Object>();
 			study.put(OTVocabularyPredicate.OT_STUDY_ID.propertyName(),
-					(String) graphDb.getNodeById(nid).getProperty(OTVocabularyPredicate.OT_STUDY_ID.propertyName()));
+					(String) studyNode.getProperty(OTVocabularyPredicate.OT_STUDY_ID.propertyName()));
+			
+			for (OTPropertyPredicate p : IndexedPrimitiveProperties.STUDIES_EXACT.properties()) {
+				if (studyNode.hasProperty(p.propertyName())) {
+					study.put(p.propertyName(), studyNode.getProperty(p.propertyName()));
+				}
+			}
+			
 			studiesFound.add(study);
 		}
 
