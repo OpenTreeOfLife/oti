@@ -49,7 +49,11 @@ for study in study_list:
 	study_id = study["name"]
 	url = make_url(study_id)
 	print "Indexing %s study %s from %s"%(oti_repo, study_id, url)
-	submit_request({"urls" : [url] })
+	try:
+		submit_request({"urls" : [url] })
+	except requests.exceptions.HTTPError as e:
+		print "\nIndexing failed for " + url + "\n\n" + e + "\n"
+		continue
 
 
 # additional code that is not currently used but may come in handy below here

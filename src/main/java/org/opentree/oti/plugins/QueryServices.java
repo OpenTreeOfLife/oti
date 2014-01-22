@@ -1,20 +1,30 @@
 package org.opentree.oti.plugins;
 
+import java.util.Map;
+import java.util.Set;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Set;
 
 import org.opentree.oti.QueryRunner;
 import org.opentree.oti.indexproperties.IndexedArrayProperties;
 import org.opentree.oti.indexproperties.IndexedPrimitiveProperties;
+import org.opentree.oti.indexproperties.OTIProperties;
 import org.opentree.oti.indexproperties.OTPropertyArray;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.queryParser.QueryParser;
+import org.apache.lucene.search.FuzzyQuery;
+import org.apache.lucene.search.MatchAllDocsQuery;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.search.TermQuery;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.index.IndexHits;
 import org.neo4j.server.plugins.*;
 import org.neo4j.server.rest.repr.OTRepresentationConverter;
 import org.neo4j.server.rest.repr.Representation;
 import org.opentree.properties.OTPropertyPredicate;
 import org.opentree.properties.OTVocabularyPredicate;
+import org.opentree.tnrs.queries.AbstractBaseQuery;
 
 /**
  * Search services for the oti nexson database.
@@ -22,6 +32,26 @@ import org.opentree.properties.OTVocabularyPredicate;
  *
  */
 public class QueryServices extends ServerPlugin {
+	
+	@Description("Returns information about all studies in the database.")
+	@PluginTarget(GraphDatabaseService.class)
+	public Representation findAllStudies(@Source GraphDatabaseService graphDb,
+		@Description("The property to be searched on. A list of searchable properties is available from the getSearchablePropertiesForStudies service.")
+			@Parameter(name = "includeTreeMetadata", optional = true) Boolean includeTreeMetadata,
+		@Description("Whether or not to include all metadata. By default, only the nexson ids of elements will be returned.")
+			@Parameter(name = "verbose", optional = true) Boolean verbose) {
+
+		// set null optional parameters to default values
+		verbose = verbose == null ? false : verbose;
+		includeTreeMetadata = includeTreeMetadata == null ? false : includeTreeMetadata;
+
+		QueryRunner runner = new QueryRunner(graphDb);
+		if (includeTreeMetadata) {
+			return OTRepresentationConverter.convert(runner.doBasicSearchForTrees(new MatchAllDocsQuery(), true, false, verbose));
+		} else {
+			return OTRepresentationConverter.convert(runner.doBasicSearchForStudies(new MatchAllDocsQuery(), true, false, verbose));
+		}
+	}
 	
 	/**
 	 * Perform a simple search for studies
@@ -42,68 +72,16 @@ public class QueryServices extends ServerPlugin {
 			@Description("Whether or not to include all metadata. By default, only the nexson ids of elements will be returned.")
 				@Parameter(name = "verbose", optional = true) Boolean verbose) {
 		
-		QueryRunner runner = new QueryRunner(graphDb);
-		boolean doExactSearch = false;
-		boolean doFulltextSearch = false;
-		OTPropertyPredicate searchProperty = null;
+		// set null optional parameters to default values
+		verbose = verbose == null ? false : verbose;
+		exact = exact == null ? false : exact;
 
-		// check exact array properties
-		for (OTPropertyArray p : IndexedArrayProperties.STUDIES_EXACT.properties()) {
-			if (p.typeProperty.propertyName().equals(property)) {
-				searchProperty = p.typeProperty;
-				doExactSearch = true;
-				break;
-			}
-		}
-		
-		// specified property not exact array property, check for simple ones
-		if (!doExactSearch) {
-			for (OTPropertyPredicate p : IndexedPrimitiveProperties.STUDIES_EXACT.properties()) {
-				if (p.propertyName().equals(property)) {
-					searchProperty = p;
-					doExactSearch = true;
-					break;
-				}
-			}
-		}
-		
-		// ensure that `verbose` is not set to null
-		if (verbose == null) {
-			verbose = false;
-		}
-
-		// ensure that `exact` is not set to null
-		if (exact == null) {
-			exact = false;
-		}
-		
-		// only use fulltext search if user hasn't designated exact matching only
-		if (! exact) {
-			
-			// check if specified property is a fulltext array property
-			for (OTPropertyArray p : IndexedArrayProperties.STUDIES_FULLTEXT.properties()) {
-				if (p.typeProperty.propertyName().equals(property)) {
-					searchProperty = p.typeProperty;
-					doFulltextSearch = true;
-					break;
-				}
-			}
-			
-			// specified property not fulltext array property, check for simple fulltext properties
-			if (!doFulltextSearch) {
-				for (OTPropertyPredicate p : IndexedPrimitiveProperties.STUDIES_FULLTEXT.properties()) {
-					if (p.propertyName().equals(property)) {
-						searchProperty = p;
-						doFulltextSearch = true;
-						break;
-					}
-				}
-			}
-		}
+		OTPropertyPredicate searchProperty = new OTIProperties().getIndexedStudyProperties().get(property);
 				
 		HashMap<String, Object> results = new HashMap<String, Object>();
 		if (searchProperty != null) {
-			results.put("matched_studies", runner.doBasicSearchForStudies(searchProperty, value, doExactSearch, doFulltextSearch, verbose));
+			QueryRunner runner = new QueryRunner(graphDb);
+			results.put("matched_studies", runner.doBasicSearchForStudies(searchProperty, value, ! exact, verbose));
 		} else {
 			results.put("error", "uncrecognized property: " + property);
 		}
@@ -130,7 +108,23 @@ public class QueryServices extends ServerPlugin {
 			@Description("Whether or not to include all metadata. By default, only the nexson ids of elements will be returned.")
 				@Parameter(name = "verbose", optional = true) Boolean verbose) {
 		
-		QueryRunner runner = new QueryRunner(graphDb);
+		// set null optional parameters to default values
+		verbose = verbose == null ? false : verbose;
+		exact = exact == null ? false : exact;
+		
+		OTPropertyPredicate searchProperty = new OTIProperties().getIndexedTreeProperties().get(property);
+		
+		HashMap<String, Object> results = new HashMap<String, Object>();
+		if (searchProperty != null) {
+			QueryRunner runner = new QueryRunner(graphDb);
+			results.put("matched_studies", runner.doBasicSearchForTrees(searchProperty, value, ! exact, verbose));
+		} else {
+			results.put("error", "uncrecognized property: " + property);
+		}
+		
+		return OTRepresentationConverter.convert(results);
+
+/*		QueryRunner runner = new QueryRunner(graphDb);
 		boolean doExactSearch = false;
 		boolean doFulltextSearch = false;
 		OTPropertyPredicate searchProperty = null;
@@ -153,16 +147,6 @@ public class QueryServices extends ServerPlugin {
 					break;
 				}
 			}
-		}
-
-		// ensure that `verbose` is not set to null
-		if (verbose == null) {
-			verbose = false;
-		}
-
-		// ensure that `exact` is not set to null
-		if (exact == null) {
-			exact = false;
 		}
 		
 		// only use fulltext search if user hasn't designated exact matching only
@@ -196,7 +180,7 @@ public class QueryServices extends ServerPlugin {
 			results.put("error", "uncrecognized property: " + property);
 		}
 		
-		return OTRepresentationConverter.convert(results);
+		return OTRepresentationConverter.convert(results); */
 	}
 	
 	/**
@@ -218,6 +202,23 @@ public class QueryServices extends ServerPlugin {
 			@Description("Whether or not to include all metadata. By default, only the nexson ids of elements will be returned.")
 				@Parameter(name = "verbose", optional = true) Boolean verbose) {
 		
+		// set null parameters to default values
+		verbose = verbose == null ? false : verbose;
+		exact = exact == null ? false : exact;
+
+		OTPropertyPredicate searchProperty = new OTIProperties().getIndexedTreeNodeProperties().get(property);
+		
+		HashMap<String, Object> results = new HashMap<String, Object>();
+		if (searchProperty != null) {
+			QueryRunner runner = new QueryRunner(graphDb);
+			results.put("matched_studies", runner.doBasicSearchForTreeNodes(searchProperty, value, ! exact, verbose));
+		} else {
+			results.put("error", "uncrecognized property: " + property);
+		}
+		
+		return OTRepresentationConverter.convert(results);
+		
+		/*
 		QueryRunner runner = new QueryRunner(graphDb);
 		boolean doExactSearch = false;
 		boolean doFulltextSearch = false;
@@ -241,16 +242,6 @@ public class QueryServices extends ServerPlugin {
 					break;
 				}
 			}
-		}
-		
-		// ensure that `verbose` is not set to null
-		if (verbose == null) {
-			verbose = false;
-		}
-
-		// ensure that `exact` is not set to null
-		if (exact == null) {
-			exact = false;
 		}
 		
 		// only use fulltext search if user hasn't designated exact matching only
@@ -284,7 +275,7 @@ public class QueryServices extends ServerPlugin {
 			results.put("error", "uncrecognized property: " + property);
 		}
 		
-		return OTRepresentationConverter.convert(results);
+		return OTRepresentationConverter.convert(results); */
 	}
 	
 	/**
@@ -298,14 +289,7 @@ public class QueryServices extends ServerPlugin {
 	@PluginTarget(GraphDatabaseService.class)
 	public Representation getSearchablePropertiesForStudies (@Source GraphDatabaseService graphDb) {
 
-		HashSet<String> properties = new HashSet<String>();
-		
-		addPrimitivePropertiesToSet(properties, IndexedPrimitiveProperties.STUDIES_EXACT);
-		addPrimitivePropertiesToSet(properties, IndexedPrimitiveProperties.STUDIES_FULLTEXT);
-		addArrayPropertiesToSet(properties, IndexedArrayProperties.STUDIES_EXACT);
-		addArrayPropertiesToSet(properties, IndexedArrayProperties.STUDIES_FULLTEXT);
-		
-		return OTRepresentationConverter.convert(properties);
+		return OTRepresentationConverter.convert(new OTIProperties().getIndexedStudyProperties().keySet());
 	}
 
 	/**
@@ -319,14 +303,7 @@ public class QueryServices extends ServerPlugin {
 	@PluginTarget(GraphDatabaseService.class)
 	public Representation getSearchablePropertiesForTrees (@Source GraphDatabaseService graphDb) {
 
-		HashSet<String> properties = new HashSet<String>();
-		
-		addPrimitivePropertiesToSet(properties, IndexedPrimitiveProperties.TREES_EXACT);
-		addPrimitivePropertiesToSet(properties, IndexedPrimitiveProperties.TREES_FULLTEXT);
-		addArrayPropertiesToSet(properties, IndexedArrayProperties.TREES_EXACT);
-		addArrayPropertiesToSet(properties, IndexedArrayProperties.TREES_FULLTEXT);
-		
-		return OTRepresentationConverter.convert(properties);
+		return OTRepresentationConverter.convert(new OTIProperties().getIndexedTreeProperties().keySet());
 	}
 
 	/**
@@ -340,35 +317,6 @@ public class QueryServices extends ServerPlugin {
 	@PluginTarget(GraphDatabaseService.class)
 	public Representation getSearchablePropertiesForTreeNodes (@Source GraphDatabaseService graphDb) {
 
-		HashSet<String> properties = new HashSet<String>();
-		
-		addPrimitivePropertiesToSet(properties, IndexedPrimitiveProperties.TREE_NODES_EXACT);
-		addPrimitivePropertiesToSet(properties, IndexedPrimitiveProperties.TREE_NODES_FULLTEXT);
-		addArrayPropertiesToSet(properties, IndexedArrayProperties.TREE_NODES_EXACT);
-		addArrayPropertiesToSet(properties, IndexedArrayProperties.TREE_NODES_FULLTEXT);
-		
-		return OTRepresentationConverter.convert(properties);
-	}
-	
-	/**
-	 * helper function
-	 * @param pSet
-	 * @param indexedProperties
-	 */
-	private void addPrimitivePropertiesToSet(Set<String> pSet, IndexedPrimitiveProperties indexedProperties) {
-		for (OTPropertyPredicate p : indexedProperties.properties()) {
-			pSet.add(p.propertyName());
-		}
-	}
-	
-	/**
-	 * helper function
-	 * @param pSet
-	 * @param indexedProperties
-	 */
-	private void addArrayPropertiesToSet(Set<String> pSet, IndexedArrayProperties indexedProperties) {
-		for (OTPropertyArray a : indexedProperties.properties()) {
-			pSet.add(a.typeProperty.propertyName());
-		}
+		return OTRepresentationConverter.convert(new OTIProperties().getIndexedTreeNodeProperties().keySet());
 	}
 }

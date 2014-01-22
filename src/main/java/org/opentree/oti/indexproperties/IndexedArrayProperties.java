@@ -1,5 +1,8 @@
 package org.opentree.oti.indexproperties;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.opentree.graphdb.NodeIndexDescription;
 import org.opentree.oti.OTINodeIndex;
 import org.opentree.properties.OTPropertyPredicate;
@@ -47,15 +50,20 @@ public enum IndexedArrayProperties {
 
 	;
 	
-	private final OTPropertyArray[] properties;
+//	private final OTPropertyArray[] properties;
 	private final NodeIndexDescription index;
+	private final HashSet<OTPropertyArray> properties;
 
-    IndexedArrayProperties(NodeIndexDescription index, OTPropertyArray[] properties) {
-        this.properties = properties;
+    IndexedArrayProperties(NodeIndexDescription index, OTPropertyArray[] propertiesArr) {
+//        this.properties = properties;
         this.index = index;
+        this.properties = new HashSet<OTPropertyArray>();
+        for (OTPropertyArray p : propertiesArr) {
+        	this.properties.add(p);
+        }
     }
 
-	public OTPropertyArray[] properties() {
+	public Set<OTPropertyArray> properties() {
 		return properties;
 	}
 
