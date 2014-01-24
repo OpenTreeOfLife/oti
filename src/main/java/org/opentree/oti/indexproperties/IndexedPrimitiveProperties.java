@@ -74,7 +74,6 @@ public enum IndexedPrimitiveProperties {
 
 	;
 	
-//	private final OTPropertyPredicate[] properties;
 	private final NodeIndexDescription index;
 	private final HashSet<OTPropertyPredicate> properties;
 
@@ -86,7 +85,6 @@ public enum IndexedPrimitiveProperties {
         }
     }
 
-//	public OTPropertyPredicate[] properties() {
 	public Set<OTPropertyPredicate> properties() {
 		return properties;
 	}

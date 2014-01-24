@@ -1,30 +1,14 @@
 package org.opentree.oti.plugins;
 
-import java.util.Map;
-import java.util.Set;
 import java.util.HashMap;
-import java.util.HashSet;
-
 import org.opentree.oti.QueryRunner;
-import org.opentree.oti.indexproperties.IndexedArrayProperties;
-import org.opentree.oti.indexproperties.IndexedPrimitiveProperties;
 import org.opentree.oti.indexproperties.OTIProperties;
-import org.opentree.oti.indexproperties.OTPropertyArray;
-import org.apache.lucene.index.Term;
-import org.apache.lucene.queryParser.QueryParser;
-import org.apache.lucene.search.FuzzyQuery;
 import org.apache.lucene.search.MatchAllDocsQuery;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.TermQuery;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.index.IndexHits;
 import org.neo4j.server.plugins.*;
 import org.neo4j.server.rest.repr.OTRepresentationConverter;
 import org.neo4j.server.rest.repr.Representation;
 import org.opentree.properties.OTPropertyPredicate;
-import org.opentree.properties.OTVocabularyPredicate;
-import org.opentree.tnrs.queries.AbstractBaseQuery;
 
 /**
  * Search services for the oti nexson database.
@@ -124,63 +108,6 @@ public class QueryServices extends ServerPlugin {
 		
 		return OTRepresentationConverter.convert(results);
 
-/*		QueryRunner runner = new QueryRunner(graphDb);
-		boolean doExactSearch = false;
-		boolean doFulltextSearch = false;
-		OTPropertyPredicate searchProperty = null;
-
-		// check exact array properties
-		for (OTPropertyArray p : IndexedArrayProperties.TREES_EXACT.properties()) {
-			if (p.typeProperty.propertyName().equals(property)) {
-				searchProperty = p.typeProperty;
-				doExactSearch = true;
-				break;
-			}
-		}
-		
-		// specified property not exact array property, check for simple ones
-		if (!doExactSearch) {
-			for (OTPropertyPredicate p : IndexedPrimitiveProperties.TREES_EXACT.properties()) {
-				if (p.propertyName().equals(property)) {
-					searchProperty = p;
-					doExactSearch = true;
-					break;
-				}
-			}
-		}
-		
-		// only use fulltext search if user hasn't designated exact matching only
-		if (! exact) {
-
-			// check fulltext array properties
-			for (OTPropertyArray p : IndexedArrayProperties.TREES_FULLTEXT.properties()) {
-				if (p.typeProperty.propertyName().equals(property)) {
-					searchProperty = p.typeProperty;
-					doFulltextSearch = true;
-					break;
-				}
-			}
-			
-			// specified property not fulltext array property, check for simple ones
-			if (!doFulltextSearch) {
-				for (OTPropertyPredicate p : IndexedPrimitiveProperties.TREES_FULLTEXT.properties()) {
-					if (p.propertyName().equals(property)) {
-						searchProperty = p;
-						doFulltextSearch = true;
-						break;
-					}
-				}
-			}
-		}
-		
-		HashMap<String, Object> results = new HashMap<String, Object>();
-		if (searchProperty != null) {
-			results.put("matched_studies", runner.doBasicSearchForTrees(searchProperty, value, doExactSearch, doFulltextSearch, verbose));
-		} else {
-			results.put("error", "uncrecognized property: " + property);
-		}
-		
-		return OTRepresentationConverter.convert(results); */
 	}
 	
 	/**
@@ -218,64 +145,6 @@ public class QueryServices extends ServerPlugin {
 		
 		return OTRepresentationConverter.convert(results);
 		
-		/*
-		QueryRunner runner = new QueryRunner(graphDb);
-		boolean doExactSearch = false;
-		boolean doFulltextSearch = false;
-		OTPropertyPredicate searchProperty = null;
-
-		// check exact array properties
-		for (OTPropertyArray p : IndexedArrayProperties.TREE_NODES_EXACT.properties()) {
-			if (p.typeProperty.propertyName().equals(property)) {
-				searchProperty = p.typeProperty;
-				doExactSearch = true;
-				break;
-			}
-		}
-		
-		// specified property not exact array property, check for simple ones
-		if (!doExactSearch) {
-			for (OTPropertyPredicate p : IndexedPrimitiveProperties.TREE_NODES_EXACT.properties()) {
-				if (p.propertyName().equals(property)) {
-					searchProperty = p;
-					doExactSearch = true;
-					break;
-				}
-			}
-		}
-		
-		// only use fulltext search if user hasn't designated exact matching only
-		if (! exact) { // condition passes for matchExactOnly == false && matchExactOnly == null
-			
-			// check fulltext array properties
-			for (OTPropertyArray p : IndexedArrayProperties.TREE_NODES_FULLTEXT.properties()) {
-				if (p.typeProperty.propertyName().equals(property)) {
-					searchProperty = p.typeProperty;
-					doFulltextSearch = true;
-					break;
-				}
-			}
-			
-			// specified property not fulltext array property, check for simple ones
-			if (!doFulltextSearch) {
-				for (OTPropertyPredicate p : IndexedPrimitiveProperties.TREE_NODES_FULLTEXT.properties()) {
-					if (p.propertyName().equals(property)) {
-						searchProperty = p;
-						doFulltextSearch = true;
-						break;
-					}
-				}
-			}
-		}
-		
-		HashMap<String, Object> results = new HashMap<String, Object>();
-		if (searchProperty != null) {
-			results.put("matched_studies", runner.doBasicSearchForTreeNodes(searchProperty, value, doExactSearch, doFulltextSearch, verbose));
-		} else {
-			results.put("error", "uncrecognized property: " + property);
-		}
-		
-		return OTRepresentationConverter.convert(results); */
 	}
 	
 	/**

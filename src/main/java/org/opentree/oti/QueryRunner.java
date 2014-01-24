@@ -341,14 +341,10 @@ public class QueryRunner extends OTIDatabase {
 		IndexHits<Node> hits = null;
 		try {
 			if (doExactSearch) {
-	//			addTreeNodeSearchResultsTo(treeTipNodeIdsByTreeRootNodeIdByStudyMetaNodeId, treeNodesByPropertyExact, query);
 	    		hits = treeNodesByPropertyExact.query(query);
 				for (Node hit : hits) {
 	
 					Node treeRootNode = OTIDatabaseUtils.getRootOfTreeContaining(hit);
-					
-	//				String studyId = (String) treeRootNode.getProperty(OTVocabularyPredicate.OT_STUDY_ID.propertyName());
-	
 					Long studyMetaNodeId = getStudyMetaNodeForTreeNode(treeRootNode).getId();
 					Long treeRootNodeId = treeRootNode.getId();
 					
@@ -368,14 +364,10 @@ public class QueryRunner extends OTIDatabase {
 			}
 			
 			if (doFulltextSearch) {
-	//			addTreeNodeSearchResultsTo(treeTipNodeIdsByTreeRootNodeIdByStudyMetaNodeId, treeNodesByPropertyFulltext, query);
 	    		hits = treeNodesByPropertyFulltext.query(query);
 				for (Node hit : hits) {
 	
 					Node treeRootNode = OTIDatabaseUtils.getRootOfTreeContaining(hit);
-					
-	//				String studyId = (String) treeRootNode.getProperty(OTVocabularyPredicate.OT_STUDY_ID.propertyName());
-	
 					Long studyMetaNodeId = getStudyMetaNodeForTreeNode(treeRootNode).getId();
 					Long treeRootNodeId = treeRootNode.getId();
 					
@@ -498,55 +490,4 @@ public class QueryRunner extends OTIDatabase {
 		
 		return treeNodesFoundByTreeAndByStudy;
 	}
-	
-	/*
-	 * Search the indexes for tree nodes matching the search parameters
-	 * @param property
-	 * 		A SearchableProperty to specify the search domain
-	 * @param searchValue
-	 * 		The value to be searched for
-	 * @return
-	 * 		A Map object containing information about hits to the search
-	 *
-	public Object doBasicSearchForTreeNodes(OTPropertyPredicate property, String searchValue, boolean isExactProperty, boolean isFulltextProperty, boolean verbose) {
-
-   		// using fuzzy queries ... may want to use different queries for exact vs. fulltext indexes
-		// TODO: this does not work when doing exact queries. probably need to define a term query for those. going to need work... or not... need to evaluate this
-
-		Query fuzzyQuery = new FuzzyQuery(new Term(property.propertyName(), QueryParser.escape(searchValue.toLowerCase())),
-				AbstractBaseQuery.getMinIdentity(searchValue));
-
-		return doBasicSearchForTreeNodes(fuzzyQuery, isExactProperty, isFulltextProperty, verbose);
-	} *
-	
-	private void addTreeNodeSearchResultsTo(Map<Long, HashMap<Long, HashSet<Long>>> results, Index<Node> index, Query query) {
-		IndexHits<Node> hits = null;
-		try {
-    		hits = index.query(query);
-			for (Node hit : hits) {
-
-				Node treeRootNode = OTIDatabaseUtils.getRootOfTreeContaining(hit);
-				
-//				String studyId = (String) treeRootNode.getProperty(OTVocabularyPredicate.OT_STUDY_ID.propertyName());
-
-				Long studyNodeId = getStudyMetaNodeForTreeNode(treeRootNode).getId();
-				Long treeRootNodeId = treeRootNode.getId();
-				
-				// add an entry for the study if this is the first time we've seen it
-				if (!results.containsKey(studyNodeId)) {
-					results.put(studyNodeId, new HashMap<Long, HashSet<Long>>());
-				}
-
-				// add an entry for the tree if this is the first time we've seen it
-				if (!results.get(studyNodeId).containsKey(treeRootNodeId)) {
-					results.get(studyNodeId).put(treeRootNodeId, new HashSet<Long>());
-				}
-				
-				// record the id of the matched tree node
-				results.get(studyNodeId).get(treeRootNodeId).add(hit.getId());
-			}
-        } finally {
-			hits.close();
-		}
-	} */
 }
