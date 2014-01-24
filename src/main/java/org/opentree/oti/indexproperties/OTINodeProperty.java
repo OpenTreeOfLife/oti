@@ -59,6 +59,12 @@ public enum OTINodeProperty implements OTPropertyPredicate {
 	DESCENDANT_MAPPED_TAXON_OTT_IDS ("tip_mapped_ottids", long[].class),
 	
 	/**
+	 * A primitive string array containing all the ott ids for taxa mapped to the tip children of a given tree node.
+	 * This is stored as a property of the root of each imported tree.
+	 */
+	DESCENDANT_TREEBASE_OTU_IDS ("tip_treebase_otu_ids", String[].class),
+	
+	/**
 	 * A boolean indicating that this node is the root for its tree. Should always (and only) be set to true for the root
 	 * node. All other tree nodes should lack this property entirely.
 	 */

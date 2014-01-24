@@ -46,8 +46,8 @@ public class StudyIndexer extends OTIDatabase {
 	 * @param property
 	 */
 	public void addStudyMetaNodeToIndexes(Node studyMetaNode) {
-		indexNodeBySimpleProperties(studyMetaNode, IndexedPrimitiveProperties.STUDIES_EXACT);
-		indexNodeBySimpleProperties(studyMetaNode, IndexedPrimitiveProperties.STUDIES_FULLTEXT);
+		indexNodeByPrimitiveProperties(studyMetaNode, IndexedPrimitiveProperties.STUDIES_EXACT);
+		indexNodeByPrimitiveProperties(studyMetaNode, IndexedPrimitiveProperties.STUDIES_FULLTEXT);
 		indexNodeByArrayProperties(studyMetaNode, IndexedArrayProperties.STUDIES_EXACT);
 		indexNodeByArrayProperties(studyMetaNode, IndexedArrayProperties.STUDIES_FULLTEXT);
 	}
@@ -79,8 +79,8 @@ public class StudyIndexer extends OTIDatabase {
 					.getEndNode().getProperty(OTVocabularyPredicate.OT_STUDY_ID.propertyName()));
 		*/
 		
-		indexNodeBySimpleProperties(treeRootNode, IndexedPrimitiveProperties.TREES_EXACT);
-		indexNodeBySimpleProperties(treeRootNode, IndexedPrimitiveProperties.TREES_FULLTEXT);
+		indexNodeByPrimitiveProperties(treeRootNode, IndexedPrimitiveProperties.TREES_EXACT);
+		indexNodeByPrimitiveProperties(treeRootNode, IndexedPrimitiveProperties.TREES_FULLTEXT);
 		indexNodeByArrayProperties(treeRootNode, IndexedArrayProperties.TREES_EXACT);
 		indexNodeByArrayProperties(treeRootNode, IndexedArrayProperties.TREES_FULLTEXT);
 	}
@@ -104,8 +104,8 @@ public class StudyIndexer extends OTIDatabase {
 	 * @param treeNode
 	 */
 	public void addTreeNodeToIndexes(Node treeNode) {
-		indexNodeBySimpleProperties(treeNode, IndexedPrimitiveProperties.TREE_NODES_EXACT);
-		indexNodeBySimpleProperties(treeNode, IndexedPrimitiveProperties.TREE_NODES_FULLTEXT);
+		indexNodeByPrimitiveProperties(treeNode, IndexedPrimitiveProperties.TREE_NODES_EXACT);
+		indexNodeByPrimitiveProperties(treeNode, IndexedPrimitiveProperties.TREE_NODES_FULLTEXT);
 		indexNodeByArrayProperties(treeNode, IndexedArrayProperties.TREE_NODES_EXACT);
 		indexNodeByArrayProperties(treeNode, IndexedArrayProperties.TREE_NODES_FULLTEXT);
 	}
@@ -127,7 +127,7 @@ public class StudyIndexer extends OTIDatabase {
 	 * @param node
 	 * @param index
 	 */
-	private void indexNodeBySimpleProperties(Node node, IndexedPrimitiveProperties indexedProperties) {
+	private void indexNodeByPrimitiveProperties(Node node, IndexedPrimitiveProperties indexedProperties) {
 		for (OTPropertyPredicate property : indexedProperties.properties()) {
 			indexSingleProperty(getNodeIndex(indexedProperties.index()), node, property.propertyName());
 		}
@@ -145,6 +145,8 @@ public class StudyIndexer extends OTIDatabase {
 			String graphArrayPropertyLabel = property.graphProperty.propertyName();
 			String indexPropertyLabel = property.typeProperty.propertyName();
 			Class<?> type = property.typeProperty.type();
+			
+			// TODO: need more complexity here for indexing various kinds of properties. booleans? datetime strings? floating point values?
 			
 			if (type.equals(String.class)) {
 				addStringArrayEntriesToIndex(node, index, graphArrayPropertyLabel, indexPropertyLabel);

@@ -15,7 +15,7 @@ public enum OTPropertyArray {
 	OT_ORIGINAL_LABEL (OTVocabularyPredicate.OT_ORIGINAL_LABEL, OTINodeProperty.DESCENDANT_ORIGINAL_TIP_LABELS),
 	OT_OTT_ID (OTVocabularyPredicate.OT_OTT_ID, OTINodeProperty.DESCENDANT_MAPPED_TAXON_OTT_IDS),
 	OT_OTT_TAXON_NAME (OTVocabularyPredicate.OT_OTT_TAXON_NAME, OTINodeProperty.DESCENDANT_MAPPED_TAXON_NAMES),
-	
+	OT_TREEBASE_OTU_ID (OTVocabularyPredicate.OT_TREEBASE_OTU_ID, OTINodeProperty.DESCENDANT_TREEBASE_OTU_IDS),
 	;
 	
 	public final OTPropertyPredicate typeProperty;

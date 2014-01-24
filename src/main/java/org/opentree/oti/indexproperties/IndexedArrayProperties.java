@@ -29,6 +29,7 @@ public enum IndexedArrayProperties {
 					OTPropertyArray.OT_ORIGINAL_LABEL,
 					OTPropertyArray.OT_OTT_ID,
 		    		OTPropertyArray.OT_OTT_TAXON_NAME,
+		    		OTPropertyArray.OT_TREEBASE_OTU_ID,
 	}),
 	
 	TREES_FULLTEXT (

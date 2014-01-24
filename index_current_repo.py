@@ -52,7 +52,7 @@ for study in study_list:
 	try:
 		submit_request({"urls" : [url] })
 	except requests.exceptions.HTTPError as e:
-		print "\nIndexing failed for " + url + "\n\n" + e + "\n"
+		print "\nIndexing failed for " + url + "\n\n" + e.message + "\n"
 		continue
 
 
