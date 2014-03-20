@@ -287,6 +287,18 @@ public class DatabaseManager extends OTIDatabase {
 			tx.finish();
 		}
 	}
+
+	/**
+	 * Given a study ID, delete the study and its trees
+	 * @param studyId
+	 */
+	public void deleteStudy(String studyId) {
+        // an attempt to add a study with the same id as an existing study overwrites the existing study
+        studyMeta = DatabaseUtils.getSingleNodeIndexHit(studyMetaNodesByProperty, OTVocabularyPredicate.OT_STUDY_ID.propertyName(), studyId);
+        if (studyMeta != null) {
+            deleteSource(studyMeta);
+        }
+    }
 	
 	// ===== other methods
 	
