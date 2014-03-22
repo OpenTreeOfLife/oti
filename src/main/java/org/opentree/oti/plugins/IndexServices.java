@@ -101,6 +101,46 @@ public class IndexServices extends ServerPlugin {
 
 	}
 
+
+	/**
+	 * Remove nexson data (if found) by study id
+	 * @param graphDb
+	 * @param url
+	 * @return
+	 * @throws IOException
+	 */
+	@Description("Unindex (remove) the nexson data for these study ids. If no matching " +
+            "study is found, do nothing. Returns an array containing the study ids for " +
+			"the studies that were successfully removed from the index, or that were " +
+            "not found (all but those whose removal failed.")
+	@PluginTarget(GraphDatabaseService.class)
+	public Representation unindexNexsons(@Source GraphDatabaseService graphDb,
+			@Description("doomed nexson ids") @Parameter(name = "ids", optional = false) String[] ids) throws IOException, Exception {
+
+		if (ids.length < 1) {
+			throw new IllegalArgumentException("You must provide at least one id for a nexson document to be removed.");
+		}
+		
+		ArrayList<String> results = new ArrayList<String>(ids.length);
+		
+		DatabaseManager manager = new DatabaseManager(graphDb);
+		for (int i = 0; i < ids.length; i++) {
+
+			String studyId = ids[i];
+	
+            try {
+                manager.deleteStudy(studyId);
+                results.add(studyId);
+            } catch (Exception ex) {
+                // report failed delete operation, or pass it on?
+                throw ex;
+            }
+		}
+
+		return OpentreeRepresentationConverter.convert(results);
+
+	}
+
 	/**
 	 * helper function for reading a nexson from a url
 	 * 
