@@ -96,6 +96,14 @@ public class DatabaseManager extends OTIDatabase {
 	// ===== adding sources and trees
 	
 	/**
+	 * Return the study metadata node for the corresponding id, if there is is one. Otherwise return null.
+	 * @return
+	 */
+	public Node getStudyMetaNodeForStudyId(String studyId) {
+		return DatabaseUtils.getSingleNodeIndexHit(studyMetaNodesByProperty, OTVocabularyPredicate.OT_STUDY_ID.propertyName(), studyId);
+	}
+	
+	/**
 	 * Install a study into the db, including loading all included trees.
 	 * 
 	 * @param study
@@ -117,7 +125,7 @@ public class DatabaseManager extends OTIDatabase {
 			String studyId = study.getId();
 
 			// an attempt to add a study with the same id as an existing study overwrites the existing study
-			studyMeta = DatabaseUtils.getSingleNodeIndexHit(studyMetaNodesByProperty, OTVocabularyPredicate.OT_STUDY_ID.propertyName(), studyId);
+			studyMeta = getStudyMetaNodeForStudyId(studyId);
 			if (studyMeta != null) {
 				deleteSource(studyMeta);
 			}
@@ -132,11 +140,9 @@ public class DatabaseManager extends OTIDatabase {
 
 			// add the trees
 			boolean noValidTrees = true;
-//			Iterator<JadeTree> treesIter = study.getTrees().iterator();
 			Iterator<NexsonTree> treesIter = study.getTrees().iterator();
 			while (treesIter.hasNext()) {
 
-//				JadeTree tree = treesIter.next();
 				NexsonTree tree = treesIter.next();
 
 				// TODO: sometimes the nexson reader returns null trees. this is a hack to deal with that.
@@ -149,7 +155,6 @@ public class DatabaseManager extends OTIDatabase {
 
 				// get the tree id from the nexson
 				// TODO: verify that this is the property we want to be using for this
-//				String treeId = (String) tree.getObject(OTINodeProperty.NEXSON_ID.propertyName());
 				String treeId = (String) tree.getId();
 				
 				// create a unique tree id by including the study id, this is the convention from treemachine
@@ -256,7 +261,7 @@ public class DatabaseManager extends OTIDatabase {
 	}
 
 	/**
-	 * Remove a study and all its trees.
+	 * Remove a study and all its trees. Index entries are deleted and all graph nodes are removed.
 	 * @param studyMeta
 	 * @throws NoSuchTreeException 
 	 */
@@ -287,18 +292,6 @@ public class DatabaseManager extends OTIDatabase {
 			tx.finish();
 		}
 	}
-
-	/**
-	 * Given a study ID, delete the study and its trees
-	 * @param studyId
-	 */
-	public void deleteStudy(String studyId) {
-        // an attempt to add a study with the same id as an existing study overwrites the existing study
-		Node studyMeta = DatabaseUtils.getSingleNodeIndexHit(studyMetaNodesByProperty, OTVocabularyPredicate.OT_STUDY_ID.propertyName(), studyId);
-        if (studyMeta != null) {
-            deleteSource(studyMeta);
-        }
-    }
 	
 	// ===== other methods
 	

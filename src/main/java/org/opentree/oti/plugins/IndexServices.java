@@ -16,6 +16,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Node;
 import org.neo4j.server.plugins.Description;
 import org.neo4j.server.plugins.Parameter;
 import org.neo4j.server.plugins.PluginTarget;
@@ -28,11 +29,13 @@ import org.neo4j.server.rest.repr.OpentreeRepresentationConverter;
 import org.neo4j.server.rest.repr.Representation;
 import org.neo4j.server.rest.repr.ValueRepresentation;
 import org.opentree.MessageLogger;
+import org.opentree.graphdb.DatabaseUtils;
 import org.opentree.nexson.io.NexsonReader;
 import org.opentree.nexson.io.NexsonSource;
 import org.opentree.oti.QueryRunner;
 import org.opentree.oti.DatabaseManager;
 import org.opentree.oti.indexproperties.IndexedPrimitiveProperties;
+import org.opentree.properties.OTVocabularyPredicate;
 
 /**
  * services for indexing. very preliminary, should probably be reorganized (later).
@@ -110,33 +113,39 @@ public class IndexServices extends ServerPlugin {
 	 * @throws IOException
 	 */
 	@Description("Unindex (remove) the nexson data for these study ids. If no matching " +
-            "study is found, do nothing. Returns an array containing the study ids for " +
-			"the studies that were successfully removed from the index, or that were " +
-            "not found (all but those whose removal failed.")
+            "study is found, do nothing. Returns arrays containing the study ids for " +
+			"the studies that were successfully removed from the index, and those that could " +
+            "not be found (and throws exceptions for those whose removal failed.")
 	@PluginTarget(GraphDatabaseService.class)
 	public Representation unindexNexsons(@Source GraphDatabaseService graphDb,
-			@Description("doomed nexson ids") @Parameter(name = "ids", optional = false) String[] ids) throws IOException, Exception {
+			@Description("doomed nexson ids") @Parameter(name = "ids", optional = false) String[] ids) throws IOException {
 
 		if (ids.length < 1) {
 			throw new IllegalArgumentException("You must provide at least one id for a nexson document to be removed.");
 		}
 		
-		ArrayList<String> results = new ArrayList<String>(ids.length);
-		
 		DatabaseManager manager = new DatabaseManager(graphDb);
-		for (int i = 0; i < ids.length; i++) {
+		
+		// record ids according the result of their attempted removal
+		ArrayList<String> idsDeleted = new ArrayList<String>(ids.length);
+		ArrayList<String> idsNotFound = new ArrayList<String>(ids.length);
+		for (String studyId : ids) {
 
-			String studyId = ids[i];
-	
-            try {
-                manager.deleteStudy(studyId);
-                results.add(studyId);
-            } catch (Exception ex) {
-                // report failed delete operation, or pass it on?
-                throw ex;
-            }
+			Node studyMeta = manager.getStudyMetaNodeForStudyId(studyId);
+	        if (studyMeta == null) {
+	        	// could not find study with this id
+	        	idsNotFound.add(studyId);
+
+	        } else {
+	        	// found it. carry out the sentence
+	            manager.deleteSource(studyMeta);
+                idsDeleted.add(studyId);
+ 	        }
 		}
 
+		HashMap<String, Object> results = new HashMap<String, Object>(); // will be converted to JSON object
+		results.put("deleted", idsDeleted);
+		results.put("not_found", idsNotFound);
 		return OpentreeRepresentationConverter.convert(results);
 
 	}
