@@ -129,6 +129,7 @@ public class IndexServices extends ServerPlugin {
 		// record ids according the result of their attempted removal
 		ArrayList<String> idsDeleted = new ArrayList<String>(ids.length);
 		ArrayList<String> idsNotFound = new ArrayList<String>(ids.length);
+		HashMap<String, String> idsWithErrors = new HashMap<String, String>();
 		for (String studyId : ids) {
 
 			Node studyMeta = manager.getStudyMetaNodeForStudyId(studyId);
@@ -138,14 +139,19 @@ public class IndexServices extends ServerPlugin {
 
 	        } else {
 	        	// found it. carry out the sentence
-	            manager.deleteSource(studyMeta);
-                idsDeleted.add(studyId);
+	        	try {
+	        		manager.deleteSource(studyMeta);
+	                idsDeleted.add(studyId);
+	        	} catch (Exception ex) {
+	        		idsWithErrors.put(studyId,ex.getMessage());
+	        	}
  	        }
 		}
 
 		HashMap<String, Object> results = new HashMap<String, Object>(); // will be converted to JSON object
 		results.put("deleted", idsDeleted);
 		results.put("not_found", idsNotFound);
+		results.put("errors", idsWithErrors);
 		return OpentreeRepresentationConverter.convert(results);
 
 	}
