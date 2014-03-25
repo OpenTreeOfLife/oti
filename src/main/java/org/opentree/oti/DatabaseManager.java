@@ -490,7 +490,10 @@ public class DatabaseManager extends OTIDatabase {
 	 */
 	private static void setNodePropertiesFromMap(Node node, Map<String, Object> properties) {
 		for (Entry<String, Object> property : properties.entrySet()) {
-			node.setProperty(property.getKey(), property.getValue());
+			Object v = property.getValue();
+			if (v != null) {
+				node.setProperty(property.getKey(), property.getValue());
+			}
 		}
 	}
 	
