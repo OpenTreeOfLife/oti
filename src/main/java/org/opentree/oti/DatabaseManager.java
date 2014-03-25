@@ -491,6 +491,9 @@ public class DatabaseManager extends OTIDatabase {
 	private static void setNodePropertiesFromMap(Node node, Map<String, Object> properties) {
 		for (Entry<String, Object> property : properties.entrySet()) {
 			Object v = property.getValue();
+			
+			// workaround for current issue where incoming NexSON from phylesystem contains invalid null property values.
+			// should revert to strict requirements (i.e. throw an exception) once the issue in phylesystem is fixed.
 			if (v != null) {
 				node.setProperty(property.getKey(), property.getValue());
 			}
