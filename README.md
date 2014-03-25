@@ -76,6 +76,12 @@ curl -v http://localhost:7474/db/data/ext/IndexServices/graphdb/indexSingleNexso
 
 It should no longer be used and the ```indexNexsons``` service should be used instead.
 
+To remove existing nexsons, call ```unindexNexsons``` with a list of ids:
+
+```
+curl -v http://localhost:7474/db/data/ext/IndexServices/graphdb/unindexNexsons
+```
+
 A python script is provided to facilitate indexing all studies in the most recent commit to master in the [phylesystem](https://github.com/OpenTreeOfLife/phylesystem) repo. It takes no arguments:
 
 ```

@@ -30,29 +30,29 @@ else:
 if oti_mode == 'github':
 	make_url = lambda study_id: "/".join([files_base_url, "study", study_id, study_id + ".json"])
 elif oti_mode == 'local':
-	make_url = lambda study_id: "http://localhost/api/default/v1/study/%s.json"%(study_id)
+	make_url = lambda study_id: "http://localhost/api/default/v1/study/{}.json".format(study_id)
 else:
-    print "Unrecognized mode %s"%(oti_mode)
+    print("Unrecognized mode {}".format(oti_mode))
 
 # or get studies from the API: ...
 # files_base_url = "http://localhost/api/default/v1/study/9.json"
 # PROBLEM: URL formation are rules in the two cases.
 
-studylist_url = "https://api.github.com/repos/OpenTreeOfLife/%s/contents/study"%(oti_repo)
+studylist_url = "https://api.github.com/repos/OpenTreeOfLife/{}/contents/study".format(oti_repo)
 r = requests.get(studylist_url)
 r.raise_for_status()
 
 study_list = r.json()
-print " Indexing %s studies from %s"%(len(study_list), oti_repo)
+print(" Indexing {} studies from {}".format(len(study_list), oti_repo))
 
 for study in study_list:
 	study_id = study["name"]
 	url = make_url(study_id)
-	print "Indexing %s study %s from %s"%(oti_repo, study_id, url)
+	print("Indexing {} study {} from {}".format(oti_repo, study_id, url))
 	try:
 		submit_request({"urls" : [url] })
 	except requests.exceptions.HTTPError as e:
-		print "\nIndexing failed for " + url + "\n\n" + e.message + "\n"
+		print("\nIndexing failed for " + url + "\n\n" + (e.message if hasattr(e, "message") else "(unknown error)") + "\n")
 		continue
 
 
