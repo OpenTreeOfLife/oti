@@ -23,30 +23,34 @@ else:
 	oti_repo = 'phylesystem'
 files_base_url = "https://raw.github.com/OpenTreeOfLife/%s/master"%(oti_repo)
 
-if len(sys.argv) > 3:
-	oti_mode = sys.argv[3]
-else:
-	oti_mode = 'github'
-if oti_mode == 'github':
-	make_url = lambda study_id: "/".join([files_base_url, "study", study_id, study_id + ".json"])
-elif oti_mode == 'local':
-	make_url = lambda study_id: "http://localhost/api/default/v1/study/{}.json".format(study_id)
-else:
-    print("Unrecognized mode {}".format(oti_mode))
+# Ignoring oti_mode for now, since we're using the local API to retrieve study
+# ids and NexSON in the required format.
+#
+##if len(sys.argv) > 3:
+##	oti_mode = sys.argv[3]
+##else:
+##	oti_mode = 'github'
+##if oti_mode == 'github':
+##	make_url = lambda study_id: "/".join([files_base_url, "study", study_id, study_id + ".json"])
+##elif oti_mode == 'local':
+##    # this is used during initial docstore indexing
+##	make_url = lambda study_id: "http://localhost/api/default/v1/study/{}.json".format(study_id)
+##else:
+##    print("Unrecognized mode {}".format(oti_mode))
+make_url = lambda study_id: "http://localhost/api/default/v1/study/{}.json".format(study_id)
 
 # or get studies from the API: ...
 # files_base_url = "http://localhost/api/default/v1/study/9.json"
 # PROBLEM: URL formation are rules in the two cases.
 
-studylist_url = "https://api.github.com/repos/OpenTreeOfLife/{}/contents/study".format(oti_repo)
+studylist_url = "http://localhost/api/study_list"
 r = requests.get(studylist_url)
 r.raise_for_status()
 
 study_list = r.json()
 print(" Indexing {} studies from {}".format(len(study_list), oti_repo))
 
-for study in study_list:
-	study_id = study["name"]
+for study_id in study_list:
 	url = make_url(study_id)
 	print("Indexing {} study {} from {}".format(oti_repo, study_id, url))
 	try:
