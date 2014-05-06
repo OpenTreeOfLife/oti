@@ -88,18 +88,20 @@ public class IndexServices extends ServerPlugin {
 		}
 		
 		ArrayList<String> results = new ArrayList<String>(urls.length);
-		
+		HashMap<String, String> idsWithErrors = new HashMap<String, String>();
 		DatabaseManager manager = new DatabaseManager(graphDb);
 		for (int i = 0; i < urls.length; i++) {
-
-			NexsonSource study = readRemoteNexson(urls[i]);
-	
-			if (study.getTrees().iterator().hasNext()) {
-				manager.addOrReplaceStudy(study);
-				results.add(study.getId());
+			try {
+				NexsonSource study = readRemoteNexson(urls[i]);
+				if (study.getTrees().iterator().hasNext()) {
+					manager.addOrReplaceStudy(study);
+					results.add(study.getId());
+				}
+			} catch (Exception ex) {
+				idsWithErrors.put(urls[i], ex.getMessage());
 			}
 		}
-
+		//results.put("errors", idsWithErrors);
 		return OpentreeRepresentationConverter.convert(results);
 
 	}

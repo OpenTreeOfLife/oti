@@ -5,6 +5,7 @@ import json, requests, sys
 def submit_request(data):
 	'''Send a request to oti to index a single study. URL is set to default neo4j location'''
 	url = oti_url + "ext/IndexServices/graphdb/indexNexsons"
+	print 'Calling "{}" with data="{}"'.format(url, repr(data))
 	r = requests.post(url,
 					  data=json.dumps(data),
 					  headers={'Content-type': 'application/json'});
