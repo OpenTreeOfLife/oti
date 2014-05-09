@@ -60,7 +60,7 @@ for study_id in study_list:
 	except requests.exceptions.HTTPError as e:
 		print("\nIndexing failed for " + url + "\n\n" + (e.message if hasattr(e, "message") else "(unknown error)") + "\n")
 	else:
-		for k, v in r['errors']:
+		for k, v in r['errors'].items():
 			print('\nIndexing failed for URL "{u}", study {s}. Message = "{v}"'.format(u=url, s=k, v=v))
 
 
