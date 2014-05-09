@@ -12,6 +12,7 @@ def submit_request(data):
 	# We don't really need any data out of r.
 	# But do raise an error if something went wrong.
 	r.raise_for_status()
+	return r.json()
 
 if len(sys.argv) > 1:
 	oti_url = sys.argv[1].rstrip("/") + "/"
@@ -55,10 +56,12 @@ for study_id in study_list:
 	url = make_url(study_id)
 	print("Indexing {} study {} from {}".format(oti_repo, study_id, url))
 	try:
-		submit_request({"urls" : [url] })
+		r = submit_request({"urls" : [url] })
 	except requests.exceptions.HTTPError as e:
 		print("\nIndexing failed for " + url + "\n\n" + (e.message if hasattr(e, "message") else "(unknown error)") + "\n")
-		continue
+	else:
+		for k, v in r['errors']:
+			print('\nIndexing failed for URL "{u}", study {s}. Message = "{v}"'.format(u=url, s=k, v=v))
 
 
 # additional code that is not currently used but may come in handy below here

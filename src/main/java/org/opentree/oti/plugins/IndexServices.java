@@ -87,7 +87,7 @@ public class IndexServices extends ServerPlugin {
 			throw new IllegalArgumentException("You must provide at least one url for a nexson document to be indexed.");
 		}
 		
-		ArrayList<String> results = new ArrayList<String>(urls.length);
+		ArrayList<String> indexedIDs = new ArrayList<String>(urls.length);
 		HashMap<String, String> idsWithErrors = new HashMap<String, String>();
 		DatabaseManager manager = new DatabaseManager(graphDb);
 		for (int i = 0; i < urls.length; i++) {
@@ -95,13 +95,15 @@ public class IndexServices extends ServerPlugin {
 				NexsonSource study = readRemoteNexson(urls[i]);
 				if (study.getTrees().iterator().hasNext()) {
 					manager.addOrReplaceStudy(study);
-					results.add(study.getId());
+					indexedIDs.add(study.getId());
 				}
 			} catch (Exception ex) {
 				idsWithErrors.put(urls[i], ex.getMessage());
 			}
 		}
-		//results.put("errors", idsWithErrors);
+		HashMap<String, Object> results = new HashMap<String, Object>(); // will be converted to JSON object
+		results.put("indexed", indexedIDs);
+		results.put("errors", idsWithErrors);
 		return OpentreeRepresentationConverter.convert(results);
 
 	}
