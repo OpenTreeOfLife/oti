@@ -66,7 +66,8 @@ public class DatabaseBrowser extends OTIDatabase {
 	 * @return
 	 * 		The root node for this tree, or null if no such tree exists
 	 */
-	public Node getTreeRootNode(String treeId, String location) {
+//	public Node getTreeRootNode(String treeId, String location) {
+	public Node getTreeRootNode(String treeId) {
 		return DatabaseUtils.getSingleNodeIndexHit(treeRootNodesByProperty, OTINodeProperty.TREE_ID.propertyName(), treeId);
 	}
 	
@@ -77,7 +78,8 @@ public class DatabaseBrowser extends OTIDatabase {
 	 * @return
 	 * 		The metadata node for this study, or null if no such study exists
 	 */
-	public Node getSourceMetaNode(String studyId, String location) {
+//	public Node getSourceMetaNode(String studyId, String location) {
+	public Node getSourceMetaNode(String studyId) {
 		return DatabaseUtils.getSingleNodeIndexHit(studyMetaNodesByProperty, OTVocabularyPredicate.OT_STUDY_ID.propertyName(), studyId);
 	}
 	

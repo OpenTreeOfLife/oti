@@ -45,7 +45,7 @@ elif echo $OSTYPE | grep "darwin" ; then
     MAC=true
 fi
 
-OTI_NEO4J_HOME="$PREFIX/neo4j-community-1.9.5-oti"
+OTI_NEO4J_HOME="$PREFIX/neo4j-oti"
 OTI_NEO4J_DAEMON="$OTI_NEO4J_HOME/bin/neo4j"
 
 # download neo4j if necessary
