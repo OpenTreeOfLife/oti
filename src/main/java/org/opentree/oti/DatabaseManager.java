@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import jade.tree.JadeNode;
 import jade.tree.JadeTree;
@@ -26,6 +27,7 @@ import org.opentree.oti.indexproperties.IndexedPrimitiveProperties;
 import org.opentree.oti.indexproperties.OTINodeProperty;
 import org.opentree.properties.BasicType;
 import org.opentree.properties.OTVocabularyPredicate;
+import org.opentree.taxonomy.TaxonomyRelType;
 import org.opentree.taxonomy.contexts.TaxonomyNodeIndex;
 import org.opentree.utils.GeneralUtils;
 import org.neo4j.graphdb.Direction;
@@ -34,6 +36,7 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.index.Index;
+import org.neo4j.graphdb.index.IndexHits;
 import org.neo4j.graphdb.index.IndexManager;
 import org.neo4j.graphdb.traversal.TraversalDescription;
 import org.neo4j.kernel.EmbeddedGraphDatabase;
@@ -52,6 +55,7 @@ public class DatabaseManager extends OTIDatabase {
 	List<String> originalTipLabelsNoSpaces;
 	List<String> mappedTaxonNames;
 	List<String> mappedTaxonNamesNoSpaces;
+	Set<Long> compatibleHigherTaxonOTTIds;
 	List<Long> mappedOTTIds;
 	
 	protected Index<Node> studyMetaNodesByProperty = getNodeIndex(OTINodeIndex.STUDY_METADATA_NODES_BY_PROPERTY_EXACT);
@@ -378,8 +382,6 @@ public class DatabaseManager extends OTIDatabase {
 		setNodePropertiesFromMap(curGraphNode, curNexsonNode.getProperties());
 
 		if (curNexsonNode.getOTU() != null) { // if this fails we actually have invalid nexson, should probably disallow this case on nexson import
-			// TODO: sort this out, should not automatically assume the label is an ott id, need to check for this property
-//			curGraphNode.setProperty(OTVocabularyPredicate.OT_OTT_TAXON_NAME.propertyName(), curNexsonNode.getOTU().getLabel()); 
 			connectTreeNodeToTaxonomy(curGraphNode);
 			setNodePropertiesFromMap(curGraphNode, curNexsonNode.getOTU().getProperties());
 		}
@@ -429,7 +431,8 @@ public class DatabaseManager extends OTIDatabase {
 		originalTipLabels = new ArrayList<String>();
 		mappedTaxonNames = new ArrayList<String>();
 		mappedOTTIds = new ArrayList<Long>();
-
+		compatibleHigherTaxonOTTIds = new HashSet<Long>();
+		
 		for (JadeNode tip : tree.getRoot().getDescendantLeaves()) {
 			
 			NexsonOTU otu = ((NexsonNode) tip.getObject(NexsonNode.NEXSON_NODE_JADE_OBJECT_KEY)).getOTU();
@@ -441,8 +444,22 @@ public class DatabaseManager extends OTIDatabase {
 				}
 				
 				if (otu.getProperty(OTVocabularyPredicate.OT_OTT_ID.propertyName()) != null) {
-					mappedOTTIds.add((Long) otu.getProperty(OTVocabularyPredicate.OT_OTT_ID.propertyName()));
+					Long ottId = (Long) otu.getProperty(OTVocabularyPredicate.OT_OTT_ID.propertyName());
+					mappedOTTIds.add(ottId);
 					mappedTaxonNames.add((String) otu.getLabel()); // TODO: switch this over to ot:ottTaxonName property once this is available	
+
+					// get all the parent taxa (all the way to the root) and record them so we can index them for this tree
+					IndexHits<Node> nodeHits = taxonNodesByOTTId.query("ot:ottId", ottId);
+					try {
+						if (nodeHits.hasNext()) {
+							Node taxonNode = nodeHits.getSingle();
+							for (Node n : Traversal.description().relationships(TaxonomyRelType.PREFTAXCHILDOF, Direction.INCOMING).traverse(taxonNode).nodes()) {
+								compatibleHigherTaxonOTTIds.add((Long) n.getProperty(OTVocabularyPredicate.OT_OTT_ID.propertyName()));
+							}
+						}
+					} finally {
+						nodeHits.close();
+					}
 				}
 			}
 		}
@@ -460,10 +477,12 @@ public class DatabaseManager extends OTIDatabase {
 		node.setProperty(OTINodeProperty.DESCENDANT_ORIGINAL_TIP_LABELS.propertyName(), GeneralUtils.convertToStringArray(originalTipLabels));
 		node.setProperty(OTINodeProperty.DESCENDANT_MAPPED_TAXON_NAMES.propertyName(), GeneralUtils.convertToStringArray(mappedTaxonNames));
 		node.setProperty(OTINodeProperty.DESCENDANT_MAPPED_TAXON_OTT_IDS.propertyName(), GeneralUtils.convertToLongArray(mappedOTTIds));
+		node.setProperty(OTINodeProperty.COMPATIBLE_HIGHER_TAXON_OTT_IDS.propertyName(), GeneralUtils.convertToLongArray(compatibleHigherTaxonOTTIds));
 		
 		// clean up the mess... just to be sure we don't accidentally use this information somewhere else
 		originalTipLabels = null;
 		mappedTaxonNames = null;
 		mappedOTTIds = null;
+		compatibleHigherTaxonOTTIds = null;
 	}
 }

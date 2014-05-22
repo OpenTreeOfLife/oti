@@ -20,6 +20,47 @@ def submit_indexing_request(data):
 	r.raise_for_status()
 	return r.json()
 
+def load_taxonomy():
+	'''Install ott... Currently not used, we just supply a pre-built taxonomy database.'''
+	
+	# setup stuff for the download 
+	download_dir = get_download_dir()
+	ott_filename = ott_file_url.rsplit("/",1)[1]
+	ott_save_path = os.path.join(download_dir,ott_filename)
+
+	# download the taxonomy if necessary
+	if not os.path.exists(ott_save_path):
+		print("Downloading ott from " + ott_file_url + ".\nThis could take a while...")
+		req = urllib2.Request(ott_file_url)
+		f = urllib2.urlopen(req)
+
+		# write the taxonomy into the file
+		ottfile = file(ott_save_path, 'wb')
+		while True:
+			chunk = f.read(1000000)
+			if not chunk: break
+			ottfile.write (chunk)
+		ottfile.close()
+
+	# extract the taxonomy if necessary
+	tax_file_path = os.path.join(download_dir,"ott","taxonomy.tsv")
+	syn_file_path = os.path.join(download_dir,"ott","synonyms.tsv")
+	if not os.path.exists(tax_file_path) or not os.path.exists(syn_file_path):
+		os.chdir(download_dir)
+		tar = tarfile.open(ott_save_path)
+		tar.extractall()
+		tar.close()
+
+	# call the taxonomy loading routines
+	url = oti_url + "ext/ConfigurationServices/graphdb/installOTT"
+	data='{"taxonomyFile":"'+tax_file_path+'","synonymFile":"'+syn_file_path+'"}'
+	print('Calling "{}" with data="{}"'.format(url, repr(data)))
+	r = requests.post(url, data, headers={'Content-type': 'application/json'});
+
+	# We don't really need any data out of r.
+	# But do raise an error if something went wrong.
+	r.raise_for_status()
+
 # default args
 if len(sys.argv) > 1:
 	oti_url = sys.argv[1].rstrip("/") + "/"
@@ -62,43 +103,10 @@ make_url = lambda study_id: "http://localhost/api/default/v1/study/{}.json".form
 # files_base_url = "http://localhost/api/default/v1/study/9.json"
 # PROBLEM: URL formation are rules in the two cases.
 
-# setup ott download stuff
-download_dir = get_download_dir()
-ott_filename = ott_file_url.rsplit("/",1)[1]
-ott_save_path = os.path.join(download_dir,ott_filename)
-
-# download the taxonomy if necessary
-if not os.path.exists(ott_save_path):
-	print("Downloading ott from " + ott_file_url + ".\nThis could take a while...")
-	req = urllib2.Request(ott_file_url)
-	f = urllib2.urlopen(req)
-
-	# write the taxonomy into the file
-	ottfile = file(ott_save_path, 'wb')
-	while True:
-		chunk = f.read(1000000)
-		if not chunk: break
-		ottfile.write (chunk)
-	ottfile.close()
-
-# extract the taxonomy if necessary
-tax_file_path = os.path.join(download_dir,"ott","taxonomy.tsv")
-syn_file_path = os.path.join(download_dir,"ott","synonyms.tsv")
-if not os.path.exists(tax_file_path) or not os.path.exists(syn_file_path):
-	os.chdir(download_dir)
-	tar = tarfile.open(ott_save_path)
-	tar.extractall()
-	tar.close()
-
-# call the taxonomy loading routines
-url = oti_url + "ext/ConfigurationServices/graphdb/installOTT"
-data='{"taxonomyFile":"'+tax_file_path+'","synonymFile":"'+syn_file_path+'"}'
-print('Calling "{}" with data="{}"'.format(url, repr(data)))
-r = requests.post(url, data, headers={'Content-type': 'application/json'});
-
-# We don't really need any data out of r.
-# But do raise an error if something went wrong.
-r.raise_for_status()
+# right now we are not loading the taxonomy, any taxonomy must be provided as a pre-built database
+load_taxonomy = False
+if load_taxonomy:
+	load_taxonomy()
 
 # retrieve the study list
 studylist_url = "http://localhost/api/study_list"
