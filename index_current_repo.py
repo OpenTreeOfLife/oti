@@ -66,16 +66,16 @@ if len(sys.argv) > 1:
 	oti_url = sys.argv[1].rstrip("/") + "/"
 	# local oti url (example): http://localhost:7474/db/data/
 else:
-	print("usage (with defaults): index_current_repo.py <oti_url> [<target_phylesystem_repo_name>](==phylesystem) [<ott_file_url>](==http://files.opentreeoflife.org/ott/ott2.8draft3.tgz)")
+	print("usage (with defaults): index_current_repo.py <oti_url> [<target_phylesystem_repo_name>](==http://localhost/api/) [<ott_file_url>](==http://files.opentreeoflife.org/ott/ott2.8draft3.tgz)")
 	sys.exit(0)
 print("Using the oti instance at: " + oti_url) 
 
 if len(sys.argv) > 2:
-	oti_repo = sys.argv[2]	# maybe 'phylesystem_test'
+	api_url = sys.argv[2].strip("/") + "/"
 else:
-	oti_repo = 'phylesystem'
-files_base_url = "https://raw.github.com/OpenTreeOfLife/%s/master"%(oti_repo)
-print("Using the phylesystem repo at: " + files_base_url) 
+	api_url = "http://localhost/api/"
+#files_base_url = "https://raw.github.com/OpenTreeOfLife/%s/master"%(oti_repo)
+print("Using the studies from: " + api_url) 
 
 if len(sys.argv) > 3:
 	ott_file_url = sys.argv[3]
@@ -97,7 +97,7 @@ print("Using the ott taxonomy at: " + ott_file_url)
 ##	make_url = lambda study_id: "http://localhost/api/default/v1/study/{}.json".format(study_id)
 ##else:
 ##    print("Unrecognized mode {}".format(oti_mode))
-make_url = lambda study_id: "http://localhost/api/default/v1/study/{}.json".format(study_id)
+make_url = lambda study_id: api_url + "default/v1/study/{}.json".format(study_id) #"http://localhost/api/default/v1/study/{}.json".format(study_id)
 
 # or get studies from the API: ...
 # files_base_url = "http://localhost/api/default/v1/study/9.json"
@@ -109,18 +109,17 @@ if load_taxonomy:
 	load_taxonomy()
 
 # retrieve the study list
-studylist_url = "http://localhost/api/study_list"
-r = requests.get(studylist_url)
+r = requests.get(api_url + "study_list")
 r.raise_for_status()
 
 study_list = r.json()
-print(" Indexing {} studies from {}".format(len(study_list), oti_repo))
+print(" Indexing {} studies from {}".format(len(study_list), api_url))
 
 for study_id in study_list:
 	url = make_url(study_id)
-	print("Indexing {} study {} from {}".format(oti_repo, study_id, url))
+	print("Indexing {} study {} from {}".format(api_url, study_id, url))
 	try:
-		r = submit_request({"urls" : [url] })
+		r = submit_indexing_request({"urls" : [url] })
 	except requests.exceptions.HTTPError as e:
 		print("\nIndexing failed for " + url + "\n\n" + (e.message if hasattr(e, "message") else "(unknown error)") + "\n")
 	else:

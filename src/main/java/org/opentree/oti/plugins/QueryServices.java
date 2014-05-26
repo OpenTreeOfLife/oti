@@ -1,6 +1,11 @@
 package org.opentree.oti.plugins;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+
 import org.opentree.oti.QueryRunner;
 import org.opentree.oti.indexproperties.OTIProperties;
 import org.apache.lucene.search.MatchAllDocsQuery;
@@ -60,14 +65,14 @@ public class QueryServices extends ServerPlugin {
 		verbose = verbose == null ? false : verbose;
 		exact = exact == null ? false : exact;
 
-		OTPropertyPredicate searchProperty = new OTIProperties().getIndexedStudyProperties().get(property);
-				
+		HashSet<OTPropertyPredicate> searchProperties = new OTIProperties().getIndexedStudyProperties().get(property);
 		HashMap<String, Object> results = new HashMap<String, Object>();
-		if (searchProperty != null) {
+				
+		if (searchProperties != null) {
 			QueryRunner runner = new QueryRunner(graphDb);
-			results.put("matched_studies", runner.doBasicSearchForStudies(searchProperty, value, ! exact, verbose));
+			results.put("matched_studies", runner.doBasicSearchForStudies(searchProperties, value, ! exact, verbose));
 		} else {
-			results.put("error", "uncrecognized property: " + property);
+			results.put("error", "unrecognized property: " + property);
 		}
 		
 		return OTRepresentationConverter.convert(results);
@@ -95,15 +100,15 @@ public class QueryServices extends ServerPlugin {
 		// set null optional parameters to default values
 		verbose = verbose == null ? false : verbose;
 		exact = exact == null ? false : exact;
-		
-		OTPropertyPredicate searchProperty = new OTIProperties().getIndexedTreeProperties().get(property);
-		
+
+		HashSet<OTPropertyPredicate> searchProperties = new OTIProperties().getIndexedTreeProperties().get(property);
 		HashMap<String, Object> results = new HashMap<String, Object>();
-		if (searchProperty != null) {
+
+		if (searchProperties != null) {
 			QueryRunner runner = new QueryRunner(graphDb);
-			results.put("matched_studies", runner.doBasicSearchForTrees(searchProperty, value, ! exact, verbose));
+			results.put("matched_studies", runner.doBasicSearchForTrees(searchProperties, value, ! exact, verbose));
 		} else {
-			results.put("error", "uncrecognized property: " + property);
+			results.put("error", "unrecognized property: " + property);
 		}
 		
 		return OTRepresentationConverter.convert(results);
@@ -133,14 +138,14 @@ public class QueryServices extends ServerPlugin {
 		verbose = verbose == null ? false : verbose;
 		exact = exact == null ? false : exact;
 
-		OTPropertyPredicate searchProperty = new OTIProperties().getIndexedTreeNodeProperties().get(property);
-		
+		HashSet<OTPropertyPredicate> searchProperties = new OTIProperties().getIndexedTreeNodeProperties().get(property);
 		HashMap<String, Object> results = new HashMap<String, Object>();
-		if (searchProperty != null) {
-			QueryRunner runner = new QueryRunner(graphDb);
-			results.put("matched_studies", runner.doBasicSearchForTreeNodes(searchProperty, value, ! exact, verbose));
+
+		if (searchProperties != null) {
+			QueryRunner runner = new QueryRunner(graphDb);			
+			results.put("matched_studies", runner.doBasicSearchForTreeNodes(searchProperties, value, ! exact, verbose));
 		} else {
-			results.put("error", "uncrecognized property: " + property);
+			results.put("error", "unrecognized property: " + property);
 		}
 		
 		return OTRepresentationConverter.convert(results);

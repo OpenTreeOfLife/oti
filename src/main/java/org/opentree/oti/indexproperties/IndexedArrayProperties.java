@@ -29,6 +29,8 @@ public enum IndexedArrayProperties {
 					OTPropertyArray.OT_ORIGINAL_LABEL,
 					OTPropertyArray.OT_OTT_ID,
 		    		OTPropertyArray.OT_OTT_TAXON_NAME,
+		    		OTPropertyArray.MAPPED_HIGHER_TAXON_OTT_IDS,
+		    		OTPropertyArray.MAPPED_HIGHER_TAXON_NAMES,
 		    		OTPropertyArray.OT_TREEBASE_OTU_ID,
 	}),
 	
@@ -37,6 +39,7 @@ public enum IndexedArrayProperties {
 			new OTPropertyArray[] {
 					OTPropertyArray.OT_ORIGINAL_LABEL,
 		    		OTPropertyArray.OT_OTT_TAXON_NAME,
+		    		OTPropertyArray.MAPPED_HIGHER_TAXON_NAMES,
 	}),
     
 	TREE_NODES_EXACT (
@@ -51,12 +54,10 @@ public enum IndexedArrayProperties {
 
 	;
 	
-//	private final OTPropertyArray[] properties;
 	private final NodeIndexDescription index;
 	private final HashSet<OTPropertyArray> properties;
 
     IndexedArrayProperties(NodeIndexDescription index, OTPropertyArray[] propertiesArr) {
-//        this.properties = properties;
         this.index = index;
         this.properties = new HashSet<OTPropertyArray>();
         for (OTPropertyArray p : propertiesArr) {

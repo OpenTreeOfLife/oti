@@ -134,7 +134,8 @@ public class StudyIndexer extends OTIDatabase {
 	}
 	
 	/**
-	 * Index a node into the supplied index under each specified property and all the values in the array stored for that property on the graph node.
+	 * Index a node into the supplied index under each specified property and all the values in the array stored for that property on
+	 * the graph node.
 	 * @param node
 	 * @param index
 	 */

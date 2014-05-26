@@ -51,12 +51,13 @@ public class DatabaseManager extends OTIDatabase {
 	Node workingCopyNodeOfInterest = null;
 
 	// used when storing taxon information to use when for indexing tree root nodes
-	List<String> originalTipLabels;
-	List<String> originalTipLabelsNoSpaces;
-	List<String> mappedTaxonNames;
-	List<String> mappedTaxonNamesNoSpaces;
+	Set<String> originalTipLabels;
+	Set<String> originalTipLabelsNoSpaces;
+	Set<String> mappedTaxonNames;
+	Set<String> mappedTaxonNamesNoSpaces;
 	Set<Long> compatibleHigherTaxonOTTIds;
-	List<Long> mappedOTTIds;
+	Set<String> compatibleHigherTaxonNames;
+	Set<Long> mappedOTTIds;
 	
 	protected Index<Node> studyMetaNodesByProperty = getNodeIndex(OTINodeIndex.STUDY_METADATA_NODES_BY_PROPERTY_EXACT);
 	
@@ -428,10 +429,11 @@ public class DatabaseManager extends OTIDatabase {
 	 */
 	private void collectTipTaxonArrayPropertiesFromJadeTree(Node node, NexsonTree tree) {
 
-		originalTipLabels = new ArrayList<String>();
-		mappedTaxonNames = new ArrayList<String>();
-		mappedOTTIds = new ArrayList<Long>();
+		originalTipLabels = new HashSet<String>();
+		mappedTaxonNames = new HashSet<String>();
+		mappedOTTIds = new HashSet<Long>();
 		compatibleHigherTaxonOTTIds = new HashSet<Long>();
+		compatibleHigherTaxonNames = new HashSet<String>();
 		
 		for (JadeNode tip : tree.getRoot().getDescendantLeaves()) {
 			
@@ -453,8 +455,12 @@ public class DatabaseManager extends OTIDatabase {
 					try {
 						if (nodeHits.hasNext()) {
 							Node taxonNode = nodeHits.getSingle();
-							for (Node n : Traversal.description().relationships(TaxonomyRelType.PREFTAXCHILDOF, Direction.INCOMING).traverse(taxonNode).nodes()) {
+							for (Node n : Traversal.description().relationships(TaxonomyRelType.PREFTAXCHILDOF, Direction.OUTGOING).traverse(taxonNode).nodes()) {
 								compatibleHigherTaxonOTTIds.add((Long) n.getProperty(OTVocabularyPredicate.OT_OTT_ID.propertyName()));
+								compatibleHigherTaxonNames.add((String) n.getProperty("name"));
+
+								// TODO: this should be as below, but need to rebuild taxonomy using the OT_OTT_TAXON_NAME enum value and test it before deploy
+//								compatibleHigherTaxonNames.add((String) n.getProperty(OTVocabularyPredicate.OT_OTT_TAXON_NAME.propertyName()));
 							}
 						}
 					} finally {
@@ -478,11 +484,13 @@ public class DatabaseManager extends OTIDatabase {
 		node.setProperty(OTINodeProperty.DESCENDANT_MAPPED_TAXON_NAMES.propertyName(), GeneralUtils.convertToStringArray(mappedTaxonNames));
 		node.setProperty(OTINodeProperty.DESCENDANT_MAPPED_TAXON_OTT_IDS.propertyName(), GeneralUtils.convertToLongArray(mappedOTTIds));
 		node.setProperty(OTINodeProperty.COMPATIBLE_HIGHER_TAXON_OTT_IDS.propertyName(), GeneralUtils.convertToLongArray(compatibleHigherTaxonOTTIds));
+		node.setProperty(OTINodeProperty.COMPATIBLE_HIGHER_TAXON_NAMES.propertyName(), GeneralUtils.convertToStringArray(compatibleHigherTaxonNames));
 		
-		// clean up the mess... just to be sure we don't accidentally use this information somewhere else
+		// clean up the mess... just to be sure we don't accidentally re-use the information from one node for another
 		originalTipLabels = null;
 		mappedTaxonNames = null;
 		mappedOTTIds = null;
 		compatibleHigherTaxonOTTIds = null;
+		compatibleHigherTaxonNames = null;
 	}
 }

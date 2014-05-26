@@ -2,6 +2,7 @@ package org.opentree.oti.indexproperties;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import org.opentree.properties.OTPropertyPredicate;
@@ -17,9 +18,9 @@ import org.opentree.properties.OTPropertyPredicate;
  */
 public class OTIProperties {
 
-	private final static HashMap <String, OTPropertyPredicate> indexedStudyProperties = new HashMap<String, OTPropertyPredicate>();
-	private final static HashMap <String, OTPropertyPredicate> indexedTreeProperties = new HashMap<String, OTPropertyPredicate>();
-	private final static HashMap <String, OTPropertyPredicate> indexedTreeNodeProperties = new HashMap<String, OTPropertyPredicate>();
+	private final static Map <String, HashSet<OTPropertyPredicate>> indexedStudyProperties = new HashMap<String, HashSet<OTPropertyPredicate>>();
+	private final static Map <String, HashSet<OTPropertyPredicate>> indexedTreeProperties = new HashMap<String, HashSet<OTPropertyPredicate>>();
+	private final static Map <String, HashSet<OTPropertyPredicate>> indexedTreeNodeProperties = new HashMap<String, HashSet<OTPropertyPredicate>>();
 	
 	public OTIProperties() {
 		collectIndexedStudyProperties();
@@ -31,7 +32,7 @@ public class OTIProperties {
 	 * Return a map view containing known study properties.
 	 * @return
 	 */
-	public Map<String, OTPropertyPredicate> getIndexedStudyProperties() {
+	public Map<String, HashSet<OTPropertyPredicate>> getIndexedStudyProperties() {
 		return Collections.unmodifiableMap(indexedStudyProperties);
 	}
 
@@ -39,7 +40,7 @@ public class OTIProperties {
 	 * Return a map view containing known study properties.
 	 * @return
 	 */
-	public Map<String, OTPropertyPredicate> getIndexedTreeProperties() {
+	public Map<String, HashSet<OTPropertyPredicate>> getIndexedTreeProperties() {
 		return Collections.unmodifiableMap(indexedTreeProperties);
 	}
 
@@ -47,26 +48,26 @@ public class OTIProperties {
 	 * Return a map view containing known study properties.
 	 * @return
 	 */
-	public Map<String, OTPropertyPredicate> getIndexedTreeNodeProperties() {
+	public Map<String, HashSet<OTPropertyPredicate>> getIndexedTreeNodeProperties() {
 		return Collections.unmodifiableMap(indexedTreeNodeProperties);
 	}
-
+	
 	/**
 	 * Collect known properties for studies.
 	 */
 	private void collectIndexedStudyProperties() {
-		
+				
 		for (OTPropertyPredicate p : IndexedPrimitiveProperties.STUDIES_EXACT.properties()) {
-			indexedStudyProperties.put(p.propertyName(), p);
+			addProperty(indexedStudyProperties, p.propertyName(), p);
 		}
 		for (OTPropertyPredicate p : IndexedPrimitiveProperties.STUDIES_FULLTEXT.properties()) {
-			indexedStudyProperties.put(p.propertyName(), p);
+			addProperty(indexedStudyProperties, p.propertyName(), p);
 		}
 		for (OTPropertyArray p : IndexedArrayProperties.STUDIES_EXACT.properties()) {
-			indexedStudyProperties.put(p.typeProperty.propertyName(), p.typeProperty);
+			addProperty(indexedStudyProperties, p.typeProperty.propertyName(), p.typeProperty);
 		}
 		for (OTPropertyArray p : IndexedArrayProperties.STUDIES_FULLTEXT.properties()) {
-			indexedStudyProperties.put(p.typeProperty.propertyName(), p.typeProperty);
+			addProperty(indexedStudyProperties, p.typeProperty.propertyName(), p.typeProperty);
 		}
 	}
 	
@@ -76,16 +77,16 @@ public class OTIProperties {
 	private void collectIndexedTreeProperties() {
 		
 		for (OTPropertyPredicate p : IndexedPrimitiveProperties.TREES_EXACT.properties()) {
-			indexedTreeProperties.put(p.propertyName(), p);
+			addProperty(indexedTreeProperties, p.propertyName(), p);
 		}
 		for (OTPropertyPredicate p : IndexedPrimitiveProperties.TREES_FULLTEXT.properties()) {
-			indexedTreeProperties.put(p.propertyName(), p);
+			addProperty(indexedTreeProperties, p.propertyName(), p);
 		}
 		for (OTPropertyArray p : IndexedArrayProperties.TREES_EXACT.properties()) {
-			indexedTreeProperties.put(p.typeProperty.propertyName(), p.typeProperty);
+			addProperty(indexedTreeProperties, p.typeProperty.propertyName(), p.typeProperty);
 		}
 		for (OTPropertyArray p : IndexedArrayProperties.TREES_FULLTEXT.properties()) {
-			indexedTreeProperties.put(p.typeProperty.propertyName(), p.typeProperty);
+			addProperty(indexedTreeProperties, p.typeProperty.propertyName(), p.typeProperty);
 		}
 	}
 	
@@ -95,17 +96,26 @@ public class OTIProperties {
 	private void collectIndexedTreeNodeProperties() {
 		
 		for (OTPropertyPredicate p : IndexedPrimitiveProperties.TREE_NODES_EXACT.properties()) {
-			indexedTreeNodeProperties.put(p.propertyName(), p);
+			addProperty(indexedTreeNodeProperties, p.propertyName(), p);
 		}
 		for (OTPropertyPredicate p : IndexedPrimitiveProperties.TREE_NODES_FULLTEXT.properties()) {
-			indexedTreeNodeProperties.put(p.propertyName(), p);
+			addProperty(indexedTreeNodeProperties, p.propertyName(), p);
 		}
 		for (OTPropertyArray p : IndexedArrayProperties.TREE_NODES_EXACT.properties()) {
-			indexedTreeNodeProperties.put(p.typeProperty.propertyName(), p.typeProperty);
+			addProperty(indexedTreeNodeProperties, p.typeProperty.propertyName(), p.typeProperty);
 		}
 		for (OTPropertyArray p : IndexedArrayProperties.TREE_NODES_FULLTEXT.properties()) {
-			indexedTreeNodeProperties.put(p.typeProperty.propertyName(), p.typeProperty);
+			addProperty(indexedTreeNodeProperties, p.typeProperty.propertyName(), p.typeProperty);
 		}
 	}
 	
+	/**
+	 * Helper method, reduces code repetition.
+	 */
+	private void addProperty(Map<String, HashSet<OTPropertyPredicate>> propertySet, String propertyName, OTPropertyPredicate property) {
+		if (! propertySet.containsKey(propertyName)) {
+			propertySet.put(propertyName, new HashSet<OTPropertyPredicate>());
+		}
+		propertySet.get(propertyName).add(property);
+	}
 }

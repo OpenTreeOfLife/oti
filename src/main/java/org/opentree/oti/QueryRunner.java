@@ -9,6 +9,8 @@ import java.util.Set;
 
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryParser.QueryParser;
+import org.apache.lucene.search.BooleanClause;
+import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.FuzzyQuery;
 import org.apache.lucene.search.Query;
@@ -59,23 +61,34 @@ public class QueryRunner extends OTIDatabase {
 	 * @return
 	 * 		A list of strings containing the node ids of the source meta nodes for sources found during search
 	 */
-	public Object doBasicSearchForStudies(OTPropertyPredicate property, String searchValue, boolean checkFulltext, boolean verbose) {
+	public Object doBasicSearchForStudies(Set<OTPropertyPredicate> properties, String searchValue, boolean checkFulltext, boolean verbose) {
 
    		// using fuzzy queries ... may want to use different queries for exact vs. fulltext indexes
-		FuzzyQuery fuzzyQuery = new FuzzyQuery(new Term(property.propertyName(), QueryParser.escape(searchValue.toLowerCase())),
-    			AbstractBaseQuery.getMinIdentity(searchValue));
-		
+		BooleanQuery fuzzyQuery = new BooleanQuery();
 		boolean doExactSearch = false;
 		boolean doFulltextSearch = false;
+		
+		if (properties != null) {
+			for (OTPropertyPredicate property : properties) {
+				fuzzyQuery.add(new FuzzyQuery(new Term(property.propertyName(),
+						QueryParser.escape(searchValue.toLowerCase())), AbstractBaseQuery.getMinIdentity(searchValue)), Occur.SHOULD);
+				
+		    	if (IndexedArrayProperties.STUDIES_EXACT.properties().contains(property) ||
+		    			IndexedPrimitiveProperties.STUDIES_FULLTEXT.properties().contains(property)) {
+		    		doExactSearch = true;
+		    	}
 
-    	if (IndexedArrayProperties.STUDIES_EXACT.properties().contains(property) || IndexedPrimitiveProperties.STUDIES_FULLTEXT.properties().contains(property)) {
-    		doExactSearch = true;
-    	}
-
-    	if (checkFulltext &&
-    			(IndexedArrayProperties.STUDIES_EXACT.properties().contains(property) || IndexedPrimitiveProperties.STUDIES_FULLTEXT.properties().contains(property))) {
-    		doFulltextSearch = true;
-    	}
+		    	if (checkFulltext &&
+		    			(IndexedArrayProperties.STUDIES_EXACT.properties().contains(property) ||
+		    					IndexedPrimitiveProperties.STUDIES_FULLTEXT.properties().contains(property))) {
+		    		doFulltextSearch = true;
+		    	}
+			}			
+		} else {
+			throw new IllegalArgumentException("attempt to execute a property-based query with no specified properties");
+		}
+		
+		fuzzyQuery.setMinimumNumberShouldMatch(1);
     	
     	return doBasicSearchForStudies(fuzzyQuery, doExactSearch, doFulltextSearch, verbose);
 	}
@@ -89,24 +102,35 @@ public class QueryRunner extends OTIDatabase {
 	 * @return
 	 * 		A Map object containing information about hits to the search
 	 */
-	public Object doBasicSearchForTrees(OTPropertyPredicate property, String searchValue, boolean checkFulltext, boolean verbose) {
+	public Object doBasicSearchForTrees(Set<OTPropertyPredicate> properties, String searchValue, boolean checkFulltext, boolean verbose) {
 
    		// using fuzzy queries ... may want to use different queries for exact vs. fulltext indexes
-		FuzzyQuery fuzzyQuery = new FuzzyQuery(new Term(property.propertyName(), QueryParser.escape(searchValue.toLowerCase())),
-    			AbstractBaseQuery.getMinIdentity(searchValue));
-	
+		BooleanQuery fuzzyQuery = new BooleanQuery();
 		boolean doExactSearch = false;
 		boolean doFulltextSearch = false;
+		
+		if (properties != null) {
+			for (OTPropertyPredicate property : properties) {
+				fuzzyQuery.add(new FuzzyQuery(new Term(property.propertyName(),
+						QueryParser.escape(searchValue.toLowerCase())), AbstractBaseQuery.getMinIdentity(searchValue)), Occur.SHOULD);
+				
+		    	if (IndexedArrayProperties.TREES_EXACT.properties().contains(property) ||
+		    			IndexedPrimitiveProperties.TREES_FULLTEXT.properties().contains(property)) {
+		    		doExactSearch = true;
+		    	}
 
-    	if (IndexedArrayProperties.TREES_EXACT.properties().contains(property) || IndexedPrimitiveProperties.TREES_FULLTEXT.properties().contains(property)) {
-    		doExactSearch = true;
-    	}
-
-    	if (checkFulltext &&
-    			(IndexedArrayProperties.TREES_EXACT.properties().contains(property) || IndexedPrimitiveProperties.TREES_FULLTEXT.properties().contains(property))) {
-    		doFulltextSearch = true;
-    	}
-
+		    	if (checkFulltext &&
+		    			(IndexedArrayProperties.TREES_EXACT.properties().contains(property) ||
+		    					IndexedPrimitiveProperties.TREES_FULLTEXT.properties().contains(property))) {
+		    		doFulltextSearch = true;
+		    	}
+			}			
+		} else {
+			throw new IllegalArgumentException("attempt to execute a property-based query with no specified properties");
+		}
+				
+		fuzzyQuery.setMinimumNumberShouldMatch(1);
+		
 		return doBasicSearchForTrees(fuzzyQuery, doExactSearch, doFulltextSearch, verbose);
 	}
 	
@@ -119,23 +143,34 @@ public class QueryRunner extends OTIDatabase {
 	 * @return
 	 * 		A Map object containing information about hits to the search
 	 */
-	public Object doBasicSearchForTreeNodes(OTPropertyPredicate property, String searchValue, boolean checkFulltext, boolean verbose) {
-
+	public Object doBasicSearchForTreeNodes(Set<OTPropertyPredicate> properties, String searchValue, boolean checkFulltext, boolean verbose) {
+		
    		// using fuzzy queries ... may want to use different queries for exact vs. fulltext indexes
-		FuzzyQuery fuzzyQuery = new FuzzyQuery(new Term(property.propertyName(), QueryParser.escape(searchValue.toLowerCase())),
-    			AbstractBaseQuery.getMinIdentity(searchValue));
-	
+		BooleanQuery fuzzyQuery = new BooleanQuery();
 		boolean doExactSearch = false;
 		boolean doFulltextSearch = false;
+		
+		if (properties != null) {
+			for (OTPropertyPredicate property : properties) {
+				fuzzyQuery.add(new FuzzyQuery(new Term(property.propertyName(),
+						QueryParser.escape(searchValue.toLowerCase())), AbstractBaseQuery.getMinIdentity(searchValue)), Occur.SHOULD);
+				
+		    	if (IndexedArrayProperties.TREE_NODES_EXACT.properties().contains(property) ||
+		    			IndexedPrimitiveProperties.TREE_NODES_FULLTEXT.properties().contains(property)) {
+		    		doExactSearch = true;
+		    	}
 
-    	if (IndexedArrayProperties.TREE_NODES_EXACT.properties().contains(property) || IndexedPrimitiveProperties.TREE_NODES_EXACT.properties().contains(property)) {
-    		doExactSearch = true;
-    	}
-
-    	if (checkFulltext &&
-    			(IndexedArrayProperties.TREE_NODES_EXACT.properties().contains(property) || IndexedPrimitiveProperties.TREE_NODES_EXACT.properties().contains(property))) {
-    		doFulltextSearch = true;
-    	}
+		    	if (checkFulltext &&
+		    			(IndexedArrayProperties.TREE_NODES_EXACT.properties().contains(property) ||
+		    					IndexedPrimitiveProperties.TREE_NODES_FULLTEXT.properties().contains(property))) {
+		    		doFulltextSearch = true;
+		    	}
+			}			
+		} else {
+			throw new IllegalArgumentException("attempt to execute a property-based query with no specified properties");
+		}
+		
+		fuzzyQuery.setMinimumNumberShouldMatch(1);
 
 		return doBasicSearchForTreeNodes(fuzzyQuery, doExactSearch, doFulltextSearch, verbose);
 	}

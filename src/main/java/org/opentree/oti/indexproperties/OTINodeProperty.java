@@ -59,10 +59,15 @@ public enum OTINodeProperty implements OTPropertyPredicate {
 	DESCENDANT_MAPPED_TAXON_OTT_IDS ("tip_mapped_ottids", long[].class),
 	
 	/**
-	 * OTT ids for higher taxa that contain children mapped to children of the given tree node.
+	 * OTT ids for higher taxa that contain children mapped to descendant nodes of the given tree node.
 	 */
 	COMPATIBLE_HIGHER_TAXON_OTT_IDS ("compatible_higher_taxon_ottids", long[].class),
 	
+	/**
+	 * OTT taaxon names for higher taxa that contain children mapped to descendant nodes of the given tree node.
+	 */
+	COMPATIBLE_HIGHER_TAXON_NAMES ("compatible_higher_taxon_names", String.class),
+
 	/**
 	 * A primitive string array containing all the ott ids for taxa mapped to the tip children of a given tree node.
 	 * This is stored as a property of the root of each imported tree.
@@ -111,7 +116,7 @@ public enum OTINodeProperty implements OTPropertyPredicate {
 	 * have their ingroup set are thus part of the outgroup.
 	 */
 	IS_WITHIN_INGROUP ("within_ingroup", boolean.class),
-	
+		
 	;
 		
 	private final String propertyName;
