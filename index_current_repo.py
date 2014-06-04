@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 
+# Command line arguments:
+#  - URL prefix for communicating with the OTI neo4j server
+#  - URL prefix for phylesystem API methods (not including 'v1/')
+#  - (future: URL for OTT tarball ?)
+
 import json, os, requests, sys, tarfile, urllib2
 
 def get_download_dir():
@@ -81,7 +86,7 @@ if len(sys.argv) > 3:
 	ott_file_url = sys.argv[3]
 else:
 	ott_file_url = "http://files.opentreeoflife.org/ott/ott2.8draft3.tgz"
-print("Using the ott taxonomy at: " + ott_file_url) 
+#print("Using the ott taxonomy at: " + ott_file_url) 
 
 # Ignoring oti_mode for now, since we're using the local API to retrieve study
 # ids and NexSON in the required format.
