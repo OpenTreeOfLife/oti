@@ -1,20 +1,9 @@
 package org.opentree.oti.plugins;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.json.simple.JSONObject;
-import org.json.simple.JSONArray;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -24,26 +13,15 @@ import org.neo4j.server.plugins.Parameter;
 import org.neo4j.server.plugins.PluginTarget;
 import org.neo4j.server.plugins.ServerPlugin;
 import org.neo4j.server.plugins.Source;
-import org.neo4j.server.rest.repr.ListRepresentation;
-import org.neo4j.server.rest.repr.MappingRepresentation;
 import org.neo4j.server.rest.repr.OTRepresentationConverter;
-//import org.neo4j.server.rest.repr.OpentreeRepresentationConverter;
 import org.neo4j.server.rest.repr.Representation;
-import org.neo4j.server.rest.repr.ValueRepresentation;
-import org.opentree.MessageLogger;
 import org.opentree.graphdb.DatabaseUtils;
 import org.opentree.graphdb.GraphDatabaseAgent;
-import org.opentree.nexson.io.NexsonReader;
-import org.opentree.nexson.io.NexsonSource;
 import org.opentree.oti.DatabaseBrowser;
-import org.opentree.oti.QueryRunner;
 import org.opentree.oti.DatabaseManager;
-import org.opentree.oti.indexproperties.IndexedPrimitiveProperties;
 import org.opentree.oti.constants.OTIGraphProperty;
 import org.opentree.oti.constants.OTIRelType;
-//import org.opentree.otu.constants.OTURelType;
 import org.opentree.taxonomy.TaxonomyLoaderOTT;
-import org.opentree.properties.OTVocabularyPredicate;
 
 /**
  * services for indexing. very preliminary, should probably be reorganized (later).
