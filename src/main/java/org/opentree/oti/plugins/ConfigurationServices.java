@@ -27,7 +27,7 @@ import org.neo4j.server.plugins.Source;
 import org.neo4j.server.rest.repr.ListRepresentation;
 import org.neo4j.server.rest.repr.MappingRepresentation;
 import org.neo4j.server.rest.repr.OTRepresentationConverter;
-import org.neo4j.server.rest.repr.OpentreeRepresentationConverter;
+//import org.neo4j.server.rest.repr.OpentreeRepresentationConverter;
 import org.neo4j.server.rest.repr.Representation;
 import org.neo4j.server.rest.repr.ValueRepresentation;
 import org.opentree.MessageLogger;
