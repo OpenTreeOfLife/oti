@@ -27,7 +27,7 @@ import org.opentree.oti.indexproperties.IndexedPrimitiveProperties;
 import org.opentree.oti.indexproperties.OTINodeProperty;
 import org.opentree.properties.BasicType;
 import org.opentree.properties.OTVocabularyPredicate;
-import org.opentree.taxonomy.TaxonomyRelType;
+import org.opentree.taxonomy.constants.TaxonomyRelType;
 import org.opentree.taxonomy.contexts.TaxonomyNodeIndex;
 import org.opentree.utils.GeneralUtils;
 import org.neo4j.graphdb.Direction;
