@@ -88,6 +88,14 @@ A python script is provided to facilitate indexing all studies in the most recen
 python index_current_repo.py
 ```
 
+The following example will index all the nexsons in the current public phylesystem:
+
+```bash
+OTI=http://localhost:7474/db/data
+PHYLESYSTEM=http://api.opentreeoflife.org/phylesystem/
+./index_current_repo.py $OTI $PHYLESYSTEM
+```
+
 ####Querying
 
 Querying is accomplished via the QueryServices plugin. It is currently possible to query for studies, trees, or tree tip nodes. You may search for any of these elements based on a variety of indexed properties. Currently, only simple, single-property queries are available.
