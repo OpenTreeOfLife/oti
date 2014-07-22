@@ -27,7 +27,7 @@ import org.opentree.oti.indexproperties.IndexedPrimitiveProperties;
 import org.opentree.oti.indexproperties.OTINodeProperty;
 import org.opentree.properties.BasicType;
 import org.opentree.properties.OTVocabularyPredicate;
-import org.opentree.taxonomy.TaxonomyRelType;
+import org.opentree.taxonomy.constants.TaxonomyRelType;
 import org.opentree.taxonomy.contexts.TaxonomyNodeIndex;
 import org.opentree.utils.GeneralUtils;
 import org.neo4j.graphdb.Direction;
@@ -457,7 +457,7 @@ public class DatabaseManager extends OTIDatabase {
 							Node taxonNode = nodeHits.getSingle();
 							for (Node n : Traversal.description().relationships(TaxonomyRelType.PREFTAXCHILDOF, Direction.OUTGOING).traverse(taxonNode).nodes()) {
 								compatibleHigherTaxonOTTIds.add((Long) n.getProperty(OTVocabularyPredicate.OT_OTT_ID.propertyName()));
-								compatibleHigherTaxonNames.add((String) n.getProperty("name"));
+								compatibleHigherTaxonNames.add((String) n.getProperty(OTVocabularyPredicate.OT_OTT_TAXON_NAME.propertyName()));
 
 								// TODO: this should be as below, but need to rebuild taxonomy using the OT_OTT_TAXON_NAME enum value and test it before deploy
 //								compatibleHigherTaxonNames.add((String) n.getProperty(OTVocabularyPredicate.OT_OTT_TAXON_NAME.propertyName()));

@@ -25,7 +25,7 @@ import org.neo4j.server.plugins.Source;
 import org.neo4j.server.rest.repr.ListRepresentation;
 import org.neo4j.server.rest.repr.MappingRepresentation;
 import org.neo4j.server.rest.repr.OTRepresentationConverter;
-import org.neo4j.server.rest.repr.OpentreeRepresentationConverter;
+//import org.neo4j.server.rest.repr.OpentreeRepresentationConverter;
 import org.neo4j.server.rest.repr.Representation;
 import org.neo4j.server.rest.repr.ValueRepresentation;
 import org.opentree.MessageLogger;
@@ -64,7 +64,7 @@ public class IndexServices extends ServerPlugin {
 
 		String[] urls = new String[] {url};
 		indexNexsons(graphDb, urls);
-		return OpentreeRepresentationConverter.convert(true);
+		return OTRepresentationConverter.convert(true);
 	
 	}
 
@@ -104,7 +104,7 @@ public class IndexServices extends ServerPlugin {
 		HashMap<String, Object> results = new HashMap<String, Object>(); // will be converted to JSON object
 		results.put("indexed", indexedIDs);
 		results.put("errors", idsWithErrors);
-		return OpentreeRepresentationConverter.convert(results);
+		return OTRepresentationConverter.convert(results);
 
 	}
 
@@ -156,7 +156,7 @@ public class IndexServices extends ServerPlugin {
 		results.put("deleted", idsDeleted);
 		results.put("not_found", idsNotFound);
 		results.put("errors", idsWithErrors);
-		return OpentreeRepresentationConverter.convert(results);
+		return OTRepresentationConverter.convert(results);
 
 	}
 
