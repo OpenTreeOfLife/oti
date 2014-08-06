@@ -144,6 +144,7 @@ public class QueryServices extends ServerPlugin {
 		if (searchProperties != null) {
 			QueryRunner runner = new QueryRunner(graphDb);			
 			results.put("matched_studies", runner.doBasicSearchForTreeNodes(searchProperties, value, doFuzzyMatching, verbose));
+			
 		} else {
 			results.put("error", "unrecognized property: " + property);
 		}
