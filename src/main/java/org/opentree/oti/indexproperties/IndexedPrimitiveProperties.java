@@ -19,11 +19,11 @@ public enum IndexedPrimitiveProperties {
 					OTVocabularyPredicate.OT_AUTHOR_CONTRIBUTED,
 					OTVocabularyPredicate.OT_COMMENT,
 					OTVocabularyPredicate.OT_CURATOR_NAME,
-			    		OTVocabularyPredicate.OT_DATA_DEPOSIT,
-			    		OTVocabularyPredicate.OT_FOCAL_CLADE, // a study property?
-		    			OTVocabularyPredicate.OT_FOCAL_CLADE_OTT_TAXON_NAME,
-		    			OTVocabularyPredicate.OT_FOCAL_CLADE_TAXON_NAME,
-		    			OTVocabularyPredicate.OT_FOCAL_CLADE_OTT_TAXON_ID,
+			    	OTVocabularyPredicate.OT_DATA_DEPOSIT,
+			    	OTVocabularyPredicate.OT_FOCAL_CLADE, // a study property?
+		    		OTVocabularyPredicate.OT_FOCAL_CLADE_OTT_TAXON_NAME,
+		    		OTVocabularyPredicate.OT_FOCAL_CLADE_TAXON_NAME,
+		    		OTVocabularyPredicate.OT_FOCAL_CLADE_OTT_TAXON_ID,
 					OTVocabularyPredicate.OT_PUBLICATION_REFERENCE,
 					OTVocabularyPredicate.OT_STUDY_ID,
 					OTVocabularyPredicate.OT_STUDY_LABEL,

@@ -57,20 +57,20 @@ public class QueryServices extends ServerPlugin {
 			@Description("The value to be searched. This must be passed as a string, but will be converted to the datatype corresponding to the "
 					+ "specified searchable value.") @Parameter(name = "value", optional = false) String value,
 			@Description("Whether to perform exact matching ONLY. Defaults to false, i.e. fuzzy matching is enabled. Only applicable for some string properties.")
-				@Parameter(name="exact", optional = true) Boolean exact,
+				@Parameter(name="exact", optional = true) Boolean checkExactOnly,
 			@Description("Whether or not to include all metadata. By default, only the nexson ids of elements will be returned.")
 				@Parameter(name = "verbose", optional = true) Boolean verbose) {
 		
 		// set null optional parameters to default values
 		verbose = verbose == null ? false : verbose;
-		exact = exact == null ? false : exact;
+		boolean doFuzzyMatching = checkExactOnly == null ? true : ! checkExactOnly;
 
 		HashSet<OTPropertyPredicate> searchProperties = new OTIProperties().getIndexedStudyProperties().get(property);
 		HashMap<String, Object> results = new HashMap<String, Object>();
 				
 		if (searchProperties != null) {
 			QueryRunner runner = new QueryRunner(graphDb);
-			results.put("matched_studies", runner.doBasicSearchForStudies(searchProperties, value, ! exact, verbose));
+			results.put("matched_studies", runner.doBasicSearchForStudies(searchProperties, value, doFuzzyMatching, verbose));
 		} else {
 			results.put("error", "unrecognized property: " + property);
 		}
@@ -93,20 +93,20 @@ public class QueryServices extends ServerPlugin {
 			@Description("The value to be searched. This must be passed as a string, but will be converted to the datatype corresponding to the "
 					+ "specified searchable value.") @Parameter(name = "value", optional = false) String value,
 			@Description("Whether to perform exact matching ONLY. Defaults to false, i.e. fuzzy matching is enabled. Only applicable for some string properties.")
-				@Parameter(name="exact", optional = true) Boolean exact,
+				@Parameter(name="exact", optional = true) Boolean checkExactOnly,
 			@Description("Whether or not to include all metadata. By default, only the nexson ids of elements will be returned.")
 				@Parameter(name = "verbose", optional = true) Boolean verbose) {
 		
 		// set null optional parameters to default values
 		verbose = verbose == null ? false : verbose;
-		exact = exact == null ? false : exact;
+		boolean doFuzzyMatching = checkExactOnly == null ? true : ! checkExactOnly;
 
 		HashSet<OTPropertyPredicate> searchProperties = new OTIProperties().getIndexedTreeProperties().get(property);
 		HashMap<String, Object> results = new HashMap<String, Object>();
 
 		if (searchProperties != null) {
 			QueryRunner runner = new QueryRunner(graphDb);
-			results.put("matched_studies", runner.doBasicSearchForTrees(searchProperties, value, ! exact, verbose));
+			results.put("matched_studies", runner.doBasicSearchForTrees(searchProperties, value, doFuzzyMatching, verbose));
 		} else {
 			results.put("error", "unrecognized property: " + property);
 		}
@@ -130,20 +130,20 @@ public class QueryServices extends ServerPlugin {
 			@Description("The value to be searched. This must be passed as a string, but will be converted to the datatype corresponding to the "
 					+ "specified searchable value.") @Parameter(name = "value", optional = false) String value,
 			@Description("Whether to perform exact matching ONLY. Defaults to false, i.e. fuzzy matching is enabled. Only applicable for some string properties.")
-				@Parameter(name="exact", optional = true) Boolean exact,
+				@Parameter(name="exact", optional = true) Boolean checkExactOnly,
 			@Description("Whether or not to include all metadata. By default, only the nexson ids of elements will be returned.")
 				@Parameter(name = "verbose", optional = true) Boolean verbose) {
 		
 		// set null parameters to default values
 		verbose = verbose == null ? false : verbose;
-		exact = exact == null ? false : exact;
+		boolean doFuzzyMatching = checkExactOnly == null ? true : ! checkExactOnly;
 
 		HashSet<OTPropertyPredicate> searchProperties = new OTIProperties().getIndexedTreeNodeProperties().get(property);
 		HashMap<String, Object> results = new HashMap<String, Object>();
 
 		if (searchProperties != null) {
 			QueryRunner runner = new QueryRunner(graphDb);			
-			results.put("matched_studies", runner.doBasicSearchForTreeNodes(searchProperties, value, ! exact, verbose));
+			results.put("matched_studies", runner.doBasicSearchForTreeNodes(searchProperties, value, doFuzzyMatching, verbose));
 		} else {
 			results.put("error", "unrecognized property: " + property);
 		}

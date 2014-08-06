@@ -74,12 +74,12 @@ public class QueryRunner extends OTIDatabase {
 						QueryParser.escape(searchValue.toLowerCase())), AbstractBaseQuery.getMinIdentity(searchValue)), Occur.SHOULD);
 				
 		    	if (IndexedArrayProperties.STUDIES_EXACT.properties().contains(property) ||
-		    			IndexedPrimitiveProperties.STUDIES_FULLTEXT.properties().contains(property)) {
+		    			IndexedPrimitiveProperties.STUDIES_EXACT.properties().contains(property)) {
 		    		doExactSearch = true;
 		    	}
 
 		    	if (checkFulltext &&
-		    			(IndexedArrayProperties.STUDIES_EXACT.properties().contains(property) ||
+		    			(IndexedArrayProperties.STUDIES_FULLTEXT.properties().contains(property) ||
 		    					IndexedPrimitiveProperties.STUDIES_FULLTEXT.properties().contains(property))) {
 		    		doFulltextSearch = true;
 		    	}
@@ -115,12 +115,12 @@ public class QueryRunner extends OTIDatabase {
 						QueryParser.escape(searchValue.toLowerCase())), AbstractBaseQuery.getMinIdentity(searchValue)), Occur.SHOULD);
 				
 		    	if (IndexedArrayProperties.TREES_EXACT.properties().contains(property) ||
-		    			IndexedPrimitiveProperties.TREES_FULLTEXT.properties().contains(property)) {
+		    			IndexedPrimitiveProperties.TREES_EXACT.properties().contains(property)) {
 		    		doExactSearch = true;
 		    	}
 
 		    	if (checkFulltext &&
-		    			(IndexedArrayProperties.TREES_EXACT.properties().contains(property) ||
+		    			(IndexedArrayProperties.TREES_FULLTEXT.properties().contains(property) ||
 		    					IndexedPrimitiveProperties.TREES_FULLTEXT.properties().contains(property))) {
 		    		doFulltextSearch = true;
 		    	}
@@ -156,12 +156,12 @@ public class QueryRunner extends OTIDatabase {
 						QueryParser.escape(searchValue.toLowerCase())), AbstractBaseQuery.getMinIdentity(searchValue)), Occur.SHOULD);
 				
 		    	if (IndexedArrayProperties.TREE_NODES_EXACT.properties().contains(property) ||
-		    			IndexedPrimitiveProperties.TREE_NODES_FULLTEXT.properties().contains(property)) {
+		    			IndexedPrimitiveProperties.TREE_NODES_EXACT.properties().contains(property)) {
 		    		doExactSearch = true;
 		    	}
 
 		    	if (checkFulltext &&
-		    			(IndexedArrayProperties.TREE_NODES_EXACT.properties().contains(property) ||
+		    			(IndexedArrayProperties.TREE_NODES_FULLTEXT.properties().contains(property) ||
 		    					IndexedPrimitiveProperties.TREE_NODES_FULLTEXT.properties().contains(property))) {
 		    		doFulltextSearch = true;
 		    	}
