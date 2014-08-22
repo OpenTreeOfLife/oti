@@ -93,10 +93,10 @@ public class IndexServices extends ServerPlugin {
 		for (int i = 0; i < urls.length; i++) {
 			try {
 				NexsonSource study = readRemoteNexson(urls[i]);
-				if (study.getTrees().iterator().hasNext()) {
+//				if (study.getTrees().iterator().hasNext()) {
 					manager.addOrReplaceStudy(study);
 					indexedIDs.add(study.getId());
-				}
+//				}
 			} catch (Exception ex) {
 				idsWithErrors.put(urls[i], ex.getMessage());
 			}
