@@ -1,13 +1,10 @@
 package org.opentree.oti.plugins;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-
 import org.opentree.oti.QueryRunner;
 import org.opentree.oti.indexproperties.OTIProperties;
+import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.search.MatchAllDocsQuery;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.server.plugins.*;
@@ -36,9 +33,9 @@ public class QueryServices extends ServerPlugin {
 
 		QueryRunner runner = new QueryRunner(graphDb);
 		if (includeTreeMetadata) {
-			return OTRepresentationConverter.convert(runner.doBasicSearchForTrees(new MatchAllDocsQuery(), true, false, verbose));
+			return OTRepresentationConverter.convert(runner.doBasicSearchForTrees(new MatchAllDocsQuery(), null, verbose));
 		} else {
-			return OTRepresentationConverter.convert(runner.doBasicSearchForStudies(new MatchAllDocsQuery(), true, false, verbose));
+			return OTRepresentationConverter.convert(runner.doBasicSearchForStudies(new MatchAllDocsQuery(), null, verbose));
 		}
 	}
 	
@@ -48,6 +45,7 @@ public class QueryServices extends ServerPlugin {
 	 * @param propertyName
 	 * @param value
 	 * @return
+	 * @throws ParseException 
 	 */
 	@Description("Perform a simple search for indexed studies")
 	@PluginTarget(GraphDatabaseService.class)
@@ -59,7 +57,7 @@ public class QueryServices extends ServerPlugin {
 			@Description("Whether to perform exact matching ONLY. Defaults to false, i.e. fuzzy matching is enabled. Only applicable for some string properties.")
 				@Parameter(name="exact", optional = true) Boolean checkExactOnly,
 			@Description("Whether or not to include all metadata. By default, only the nexson ids of elements will be returned.")
-				@Parameter(name = "verbose", optional = true) Boolean verbose) {
+				@Parameter(name = "verbose", optional = true) Boolean verbose) throws ParseException {
 		
 		// set null optional parameters to default values
 		verbose = verbose == null ? false : verbose;

@@ -5,28 +5,25 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.lucene.index.Term;
+import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.QueryParser;
-import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.FuzzyQuery;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.TermQuery;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.index.Index;
 import org.neo4j.graphdb.index.IndexHits;
 import org.neo4j.kernel.EmbeddedGraphDatabase;
 import org.opentree.graphdb.GraphDatabaseAgent;
-import org.opentree.oti.constants.OTIRelType;
 import org.opentree.oti.indexproperties.IndexedArrayProperties;
 import org.opentree.oti.indexproperties.IndexedPrimitiveProperties;
 import org.opentree.oti.indexproperties.OTINodeProperty;
-import org.opentree.oti.indexproperties.OTPropertyArray;
 import org.opentree.properties.OTPropertyPredicate;
 import org.opentree.properties.OTVocabularyPredicate;
 import org.opentree.tnrs.queries.AbstractBaseQuery;
@@ -60,37 +57,35 @@ public class QueryRunner extends OTIDatabase {
 	 * 		The value to be searched for
 	 * @return
 	 * 		A list of strings containing the node ids of the source meta nodes for sources found during search
+	 * @throws ParseException 
 	 */
-	public Object doBasicSearchForStudies(Set<OTPropertyPredicate> properties, String searchValue, boolean checkFulltext, boolean verbose) {
+	public Object doBasicSearchForStudies(Set<OTPropertyPredicate> properties, String searchValue, boolean checkFulltext, boolean verbose) throws ParseException {
 
-   		// using fuzzy queries ... may want to use different queries for exact vs. fulltext indexes
-		BooleanQuery fuzzyQuery = new BooleanQuery();
-		boolean doExactSearch = false;
-		boolean doFulltextSearch = false;
+		BooleanQuery query = new BooleanQuery();
+		query.setMinimumNumberShouldMatch(1);
 		
-		if (properties != null) {
-			for (OTPropertyPredicate property : properties) {
-				fuzzyQuery.add(new FuzzyQuery(new Term(property.propertyName(),
-						QueryParser.escape(searchValue.toLowerCase())), AbstractBaseQuery.getMinIdentity(searchValue)), Occur.SHOULD);
-				
-		    	if (IndexedArrayProperties.STUDIES_EXACT.properties().contains(property) ||
-		    			IndexedPrimitiveProperties.STUDIES_EXACT.properties().contains(property)) {
-		    		doExactSearch = true;
-		    	}
+		HashMap<String,Object> exactProperties = new HashMap<String,Object>();
 
-		    	if (checkFulltext &&
-		    			(IndexedArrayProperties.STUDIES_FULLTEXT.properties().contains(property) ||
-		    					IndexedPrimitiveProperties.STUDIES_FULLTEXT.properties().contains(property))) {
-		    		doFulltextSearch = true;
-		    	}
-			}			
-		} else {
+		if (properties == null) {
 			throw new IllegalArgumentException("attempt to execute a property-based query with no specified properties");
 		}
-		
-		fuzzyQuery.setMinimumNumberShouldMatch(1);
-    	
-    	return doBasicSearchForStudies(fuzzyQuery, doExactSearch, doFulltextSearch, verbose);
+
+		for (OTPropertyPredicate property : properties) {
+			
+	    	if (IndexedArrayProperties.STUDIES_EXACT.properties().contains(property) ||
+	    			IndexedPrimitiveProperties.STUDIES_EXACT.properties().contains(property)) {
+	    		exactProperties.put(property.propertyName(),searchValue);
+	    	}
+
+	    	if (checkFulltext &&
+	    			(IndexedArrayProperties.STUDIES_FULLTEXT.properties().contains(property) ||
+	    					IndexedPrimitiveProperties.STUDIES_FULLTEXT.properties().contains(property))) {
+				query.add(new FuzzyQuery(new Term(property.propertyName(), QueryParser.escape(searchValue.toLowerCase())),
+						AbstractBaseQuery.getMinIdentity(searchValue)), Occur.SHOULD);
+	    	}
+		}	
+
+    	return doBasicSearchForStudies(query, exactProperties, verbose);
 	}
 	
 	/**
@@ -104,34 +99,32 @@ public class QueryRunner extends OTIDatabase {
 	 */
 	public Object doBasicSearchForTrees(Set<OTPropertyPredicate> properties, String searchValue, boolean checkFulltext, boolean verbose) {
 
-   		// using fuzzy queries ... may want to use different queries for exact vs. fulltext indexes
-		BooleanQuery fuzzyQuery = new BooleanQuery();
-		boolean doExactSearch = false;
-		boolean doFulltextSearch = false;
+		BooleanQuery query = new BooleanQuery();
+		query.setMinimumNumberShouldMatch(1);
 		
-		if (properties != null) {
-			for (OTPropertyPredicate property : properties) {
-				fuzzyQuery.add(new FuzzyQuery(new Term(property.propertyName(),
-						QueryParser.escape(searchValue.toLowerCase())), AbstractBaseQuery.getMinIdentity(searchValue)), Occur.SHOULD);
-				
-		    	if (IndexedArrayProperties.TREES_EXACT.properties().contains(property) ||
-		    			IndexedPrimitiveProperties.TREES_EXACT.properties().contains(property)) {
-		    		doExactSearch = true;
-		    	}
+		HashMap<String,Object> exactProperties = new HashMap<String,Object>();
 
-		    	if (checkFulltext &&
-		    			(IndexedArrayProperties.TREES_FULLTEXT.properties().contains(property) ||
-		    					IndexedPrimitiveProperties.TREES_FULLTEXT.properties().contains(property))) {
-		    		doFulltextSearch = true;
-		    	}
-			}			
-		} else {
+		if (properties == null) {
 			throw new IllegalArgumentException("attempt to execute a property-based query with no specified properties");
 		}
-				
-		fuzzyQuery.setMinimumNumberShouldMatch(1);
-		
-		return doBasicSearchForTrees(fuzzyQuery, doExactSearch, doFulltextSearch, verbose);
+
+		for (OTPropertyPredicate property : properties) {
+			
+	    	if (IndexedArrayProperties.TREES_EXACT.properties().contains(property) ||
+	    			IndexedPrimitiveProperties.TREES_EXACT.properties().contains(property)) {
+	    		exactProperties.put(property.propertyName(),searchValue);
+	    	}
+
+	    	if (checkFulltext &&
+	    			(IndexedArrayProperties.TREES_FULLTEXT.properties().contains(property) ||
+	    					IndexedPrimitiveProperties.TREES_FULLTEXT.properties().contains(property))) {
+				query.add(new FuzzyQuery(new Term(property.propertyName(), QueryParser.escape(searchValue.toLowerCase())),
+						AbstractBaseQuery.getMinIdentity(searchValue)), Occur.SHOULD);
+	    	}
+		}	
+
+//		return exactProperties.toString();
+    	return doBasicSearchForTrees(query, exactProperties, verbose);
 	}
 	
 	/**
@@ -145,6 +138,33 @@ public class QueryRunner extends OTIDatabase {
 	 */
 	public Object doBasicSearchForTreeNodes(Set<OTPropertyPredicate> properties, String searchValue, boolean checkFulltext, boolean verbose) {
 		
+		BooleanQuery query = new BooleanQuery();
+		query.setMinimumNumberShouldMatch(1);
+		
+		HashMap<String,Object> exactProperties = new HashMap<String,Object>();
+
+		if (properties == null) {
+			throw new IllegalArgumentException("attempt to execute a property-based query with no specified properties");
+		}
+
+		for (OTPropertyPredicate property : properties) {
+			
+	    	if (IndexedArrayProperties.TREE_NODES_EXACT.properties().contains(property) ||
+	    			IndexedPrimitiveProperties.TREE_NODES_EXACT.properties().contains(property)) {
+	    		exactProperties.put(property.propertyName(),searchValue);
+	    	}
+
+	    	if (checkFulltext &&
+	    			(IndexedArrayProperties.TREE_NODES_FULLTEXT.properties().contains(property) ||
+	    					IndexedPrimitiveProperties.TREE_NODES_FULLTEXT.properties().contains(property))) {
+				query.add(new FuzzyQuery(new Term(property.propertyName(), QueryParser.escape(searchValue.toLowerCase())),
+						AbstractBaseQuery.getMinIdentity(searchValue)), Occur.SHOULD);
+	    	}
+		}	
+
+    	return doBasicSearchForTreeNodes(query, exactProperties, verbose);
+    	
+		/*
    		// using fuzzy queries ... may want to use different queries for exact vs. fulltext indexes
 		BooleanQuery fuzzyQuery = new BooleanQuery();
 		boolean doExactSearch = false;
@@ -173,18 +193,84 @@ public class QueryRunner extends OTIDatabase {
 		fuzzyQuery.setMinimumNumberShouldMatch(1);
 
 		return doBasicSearchForTreeNodes(fuzzyQuery, doExactSearch, doFulltextSearch, verbose);
+		*/
+	}
+
+	public Object doBasicSearchForStudies(Query query, Map<String,Object> exactProperties, boolean verbose) {		
+		
+		if (query == null && (exactProperties == null || exactProperties.isEmpty())) {
+			throw new IllegalArgumentException("Request to do a query where neither exact nor fulltext indexes are to be searched. This is illegal--at least one type of indexed must be searched.");
+		}
+		
+		// prepare to record a list of found studies
+		Set<Long> studyMetaNodeIds = new HashSet<Long>();
+
+		// search the indexes, record all matching studies
+		IndexHits<Node> hits = null;
+        try {
+        	if (exactProperties != null) {
+        		for (Entry<String,Object> p : exactProperties.entrySet()) {
+					hits = studyMetaNodesByPropertyExact.get(p.getKey(),p.getValue()); // use index.get() method for exact matches!
+					for (Node hit : hits) {
+						studyMetaNodeIds.add(hit.getId());
+					}
+        		}
+        	}
+        	if (query != null) {
+				hits = studyMetaNodesByPropertyFulltext.query(query);
+				for (Node hit : hits) {
+					studyMetaNodeIds.add(hit.getId());
+				}
+        	}
+        } finally {
+			hits.close();
+		}
+		
+        // for each study found
+		List<HashMap<String, Object>> studiesFound = new LinkedList<HashMap<String, Object>>();
+		for (Long nid : studyMetaNodeIds) {
+
+			// prepare to collect study metadata
+			Node studyNode = graphDb.getNodeById(nid);
+			HashMap<String, Object> study = new HashMap<String, Object>();
+			
+			// record additional metadata if requested
+			if (verbose) {
+				
+				// TODO: this two-pass approach could be made more efficient--there is overlap between the exact and fulltext properties
+				for (OTPropertyPredicate p : IndexedPrimitiveProperties.STUDIES_EXACT.properties()) {
+					if (studyNode.hasProperty(p.propertyName())) {
+						study.put(p.propertyName(), studyNode.getProperty(p.propertyName()));
+					}
+				}
+				for (OTPropertyPredicate p : IndexedPrimitiveProperties.STUDIES_FULLTEXT.properties()) {
+					if (studyNode.hasProperty(p.propertyName())) {
+						study.put(p.propertyName(), studyNode.getProperty(p.propertyName()));
+					}
+				}
+
+			// otherwise just record ids
+			} else {
+				study.put(OTVocabularyPredicate.OT_STUDY_ID.propertyName(),
+						(String) studyNode.getProperty(OTVocabularyPredicate.OT_STUDY_ID.propertyName()));
+			}
+			
+			studiesFound.add(study);
+		}
+
+		return studiesFound;
 	}
 	
-	/**
+	/*
 	 * Search the indexes using the provided Query object for studies that match.
 	 * @param query
 	 * @param doExactSearch
 	 * @param doFulltextSearch
 	 * @param verbose
 	 * @return
-	 */
+	 *
 	public Object doBasicSearchForStudies(Query query, boolean doExactSearch, boolean doFulltextSearch, boolean verbose) {
-		
+	
 		if (!doExactSearch && !doFulltextSearch) {
 			throw new IllegalArgumentException("Request to do a query where neither exact nor fulltext indexes are to be searched. This is illegal--at least one type of indexed must be searched.");
 		}
@@ -244,7 +330,7 @@ public class QueryRunner extends OTIDatabase {
 		}
 
 		return studiesFound;
-	}
+	} */
 	
 	/**
 	 * Search the indexes using the provided Query object for trees that match.
@@ -254,7 +340,7 @@ public class QueryRunner extends OTIDatabase {
 	 * @param verbose
 	 * @return
 	 */
-	public Object doBasicSearchForTrees(Query query, boolean doExactSearch, boolean doFulltextSearch, boolean verbose) {
+/*	public Object doBasicSearchForTrees(Query query, boolean doExactSearch, boolean doFulltextSearch, boolean verbose) {
 
 		if (!doExactSearch && !doFulltextSearch) {
 			throw new IllegalArgumentException("Request to do a query where neither exact nor fulltext indexes are to be searched. This is illegal--at least one type of indexed must be searched.");
@@ -290,8 +376,47 @@ public class QueryRunner extends OTIDatabase {
         	}
         } finally {
 			hits.close();
+		} */
+	
+	public Object doBasicSearchForTrees(Query query, Map<String,Object> exactProperties, boolean verbose) {		
+		
+		if (query == null && (exactProperties == null || exactProperties.isEmpty())) {
+			throw new IllegalArgumentException("Request to do a query where neither exact nor fulltext indexes are to be searched. This is illegal--at least one type of indexed must be searched.");
 		}
-        
+		
+		// prepare to record a list of matching trees and the studies containing them
+		HashMap<Long, HashSet<Long>> treeRootNodeIdsByStudyMetaNodeId = new HashMap<Long, HashSet<Long>>();
+		
+		// search the indexes and record matching trees and studies
+		IndexHits<Node> hits = null;
+        try {
+        	if (exactProperties != null) {
+        		for (Entry<String,Object> p : exactProperties.entrySet()) {
+	        		hits = treeRootNodesByPropertyExact.get(p.getKey(),p.getValue()); // use index.get() method for exact matches!
+	        		for (Node hit : hits) {
+						Long studyMetaNodeId = getStudyMetaNodeForTreeNode(hit).getId();
+						if (!treeRootNodeIdsByStudyMetaNodeId.containsKey(studyMetaNodeId)) {
+							treeRootNodeIdsByStudyMetaNodeId.put(studyMetaNodeId, new HashSet<Long>());
+						}
+						treeRootNodeIdsByStudyMetaNodeId.get(studyMetaNodeId).add(hit.getId());
+					}
+        		}
+        	}
+        	if (query != null) {
+				hits = treeRootNodesByPropertyFulltext.query(query);
+				for (Node hit : hits) {
+
+					Long studyMetaNodeId = getStudyMetaNodeForTreeNode(hit).getId();
+					if (!treeRootNodeIdsByStudyMetaNodeId.containsKey(studyMetaNodeId)) {
+						treeRootNodeIdsByStudyMetaNodeId.put(studyMetaNodeId, new HashSet<Long>());
+					}
+					treeRootNodeIdsByStudyMetaNodeId.get(studyMetaNodeId).add(hit.getId());
+				}
+        	}
+        } finally {
+			hits.close();
+		}
+		        
 		// for each study containing a matched tree
 		List<HashMap<String, Object>> treesFoundByStudy = new LinkedList<HashMap<String, Object>>();
 		for (Long studyNodeId : treeRootNodeIdsByStudyMetaNodeId.keySet()) {
@@ -364,9 +489,14 @@ public class QueryRunner extends OTIDatabase {
 	 * @return
 	 * 		A Map object containing information about hits to the search
 	 */
-	public Object doBasicSearchForTreeNodes(Query query, boolean doExactSearch, boolean doFulltextSearch, boolean verbose) {
+//	public Object doBasicSearchForTreeNodes(Query query, boolean doExactSearch, boolean doFulltextSearch, boolean verbose) {
+	public Object doBasicSearchForTreeNodes(Query query, Map<String,Object> exactProperties, boolean verbose) {
 		
-		if (!doExactSearch && !doFulltextSearch) {
+/*		if (!doExactSearch && !doFulltextSearch) {
+			throw new IllegalArgumentException("Request to do a query where neither exact nor fulltext indexes are to be searched. This is illegal--at least one type of indexed must be searched.");
+		} */
+		
+		if (query == null && (exactProperties == null || exactProperties.isEmpty())) {
 			throw new IllegalArgumentException("Request to do a query where neither exact nor fulltext indexes are to be searched. This is illegal--at least one type of indexed must be searched.");
 		}
 
@@ -375,30 +505,36 @@ public class QueryRunner extends OTIDatabase {
 		
 		IndexHits<Node> hits = null;
 		try {
+			/*
 			if (doExactSearch) {
 	    		hits = treeNodesByPropertyExact.query(query);
-				for (Node hit : hits) {
-	
-					Node treeRootNode = OTIDatabaseUtils.getRootOfTreeContaining(hit);
-					Long studyMetaNodeId = getStudyMetaNodeForTreeNode(treeRootNode).getId();
-					Long treeRootNodeId = treeRootNode.getId();
-					
-					// add an entry for the study if this is the first time we've seen it
-					if (!treeTipNodeIdsByTreeRootNodeIdByStudyMetaNodeId.containsKey(studyMetaNodeId)) {
-						treeTipNodeIdsByTreeRootNodeIdByStudyMetaNodeId.put(studyMetaNodeId, new HashMap<Long, HashSet<Long>>());
+	    		*/
+	       	if (exactProperties != null) {
+        		for (Entry<String,Object> p : exactProperties.entrySet()) {
+	        		hits = treeRootNodesByPropertyExact.get(p.getKey(),p.getValue()); // use index.get() method for exact matches!
+					for (Node hit : hits) {
+		
+						Node treeRootNode = OTIDatabaseUtils.getRootOfTreeContaining(hit);
+						Long studyMetaNodeId = getStudyMetaNodeForTreeNode(treeRootNode).getId();
+						Long treeRootNodeId = treeRootNode.getId();
+						
+						// add an entry for the study if this is the first time we've seen it
+						if (!treeTipNodeIdsByTreeRootNodeIdByStudyMetaNodeId.containsKey(studyMetaNodeId)) {
+							treeTipNodeIdsByTreeRootNodeIdByStudyMetaNodeId.put(studyMetaNodeId, new HashMap<Long, HashSet<Long>>());
+						}
+		
+						// add an entry for the tree if this is the first time we've seen it
+						if (!treeTipNodeIdsByTreeRootNodeIdByStudyMetaNodeId.get(studyMetaNodeId).containsKey(treeRootNodeId)) {
+							treeTipNodeIdsByTreeRootNodeIdByStudyMetaNodeId.get(studyMetaNodeId).put(treeRootNodeId, new HashSet<Long>());
+						}
+						
+						// record the id of the matched tree node
+						treeTipNodeIdsByTreeRootNodeIdByStudyMetaNodeId.get(studyMetaNodeId).get(treeRootNodeId).add(hit.getId());
 					}
-	
-					// add an entry for the tree if this is the first time we've seen it
-					if (!treeTipNodeIdsByTreeRootNodeIdByStudyMetaNodeId.get(studyMetaNodeId).containsKey(treeRootNodeId)) {
-						treeTipNodeIdsByTreeRootNodeIdByStudyMetaNodeId.get(studyMetaNodeId).put(treeRootNodeId, new HashSet<Long>());
-					}
-					
-					// record the id of the matched tree node
-					treeTipNodeIdsByTreeRootNodeIdByStudyMetaNodeId.get(studyMetaNodeId).get(treeRootNodeId).add(hit.getId());
-				}
+        		}
 			}
 			
-			if (doFulltextSearch) {
+			if (query != null) {
 	    		hits = treeNodesByPropertyFulltext.query(query);
 				for (Node hit : hits) {
 	
