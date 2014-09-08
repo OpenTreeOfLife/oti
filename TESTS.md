@@ -1,7 +1,7 @@
 Currently, there are no automated test procedures for OTI. You can however, fairly thoroughly test the performance manually. Run the following command to index the current phylesystem repo on devapi.opentreeoflife.org:
 
 ``bash
-./index_current_repo.py http://localhost:7474/db/data http://devapi.opentreeoflife.org/api
+./index_current_repo.py http://devapi.opentreeoflife.org/oti http://devapi.opentreeoflife.org/api
 ```
 
 And then (assuming indexing worked), query the database to test it. Here are some example queries using cURL, and their expected results.
@@ -9,7 +9,7 @@ And then (assuming indexing worked), query the database to test it. Here are som
 ### Return a list of all studies:
 
 ```bash
-curl -X POST http://localhost:7474/db/data/ext/studies/graphdb/find_studies
+curl -X POST http://devapi.opentreeoflife.org/oti/ext/studies/graphdb/find_studies
 ``` 
 
 ```json
@@ -29,7 +29,7 @@ curl -X POST http://localhost:7474/db/data/ext/studies/graphdb/find_studies
 ### Search for studies with trees spanning the taxon with name "Annona glabra":
 
 ```bash
-curl -X POST http://localhost:7474/db/data/ext/studies/graphdb/find_trees -H "content-type: application/json" -d '{"property":"ot:ottTaxonName","value":"Annona glabra"}'
+curl -X POST http://devapi.opentreeoflife.org/ext/studies/graphdb/find_trees -H "content-type: application/json" -d '{"property":"ot:ottTaxonName","value":"Annona glabra"}'
 ```
 
 ```json
@@ -53,7 +53,7 @@ curl -X POST http://localhost:7474/db/data/ext/studies/graphdb/find_trees -H "co
 ### Get a list of properties available for searching studies and trees:
 
 ```bash
-curl -X POST http://localhost:7474/db/data/ext/studies/graphdb/properties
+curl -X POST http://devapi.opentreeolife.org/ext/studies/graphdb/properties
 ```
 
 ```json
