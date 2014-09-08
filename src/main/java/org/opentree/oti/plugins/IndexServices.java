@@ -43,6 +43,7 @@ import org.opentree.properties.OTVocabularyPredicate;
  * @author cody
  * 
  */
+@Deprecated
 public class IndexServices extends ServerPlugin {
 
 	/**
@@ -80,6 +81,7 @@ public class IndexServices extends ServerPlugin {
 			"previously indexed study, then the previous information for that study will be replaced by the incoming nexson. Returns an " +
 			"array containing the study ids for the studies that were successfully read and indexed.")
 	@PluginTarget(GraphDatabaseService.class)
+	@Deprecated
 	public Representation indexNexsons(@Source GraphDatabaseService graphDb,
 			@Description("remote nexson urls") @Parameter(name = "urls", optional = false) String[] urls) throws MalformedURLException, IOException {
 
@@ -121,6 +123,7 @@ public class IndexServices extends ServerPlugin {
 			"the studies that were successfully removed from the index, and those that could " +
             "not be found (and throws exceptions for those whose removal failed.")
 	@PluginTarget(GraphDatabaseService.class)
+	@Deprecated
 	public Representation unindexNexsons(@Source GraphDatabaseService graphDb,
 			@Description("doomed nexson ids") @Parameter(name = "ids", optional = false) String[] ids) throws IOException {
 
