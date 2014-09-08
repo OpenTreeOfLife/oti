@@ -1,6 +1,6 @@
 Currently, there are no automated test procedures for OTI. You can however, fairly thoroughly test the performance manually. Run the following command to index the current phylesystem repo on devapi.opentreeoflife.org:
 
-``bash
+```bash
 ./index_current_repo.py http://devapi.opentreeoflife.org/oti http://devapi.opentreeoflife.org/api
 ```
 
@@ -25,6 +25,7 @@ curl -X POST http://devapi.opentreeoflife.org/oti/ext/studies/graphdb/find_studi
     "ot:studyId" : "1827"
   } ]
 }
+```
 
 ### Search for studies with trees spanning the taxon with name "Annona glabra":
 
