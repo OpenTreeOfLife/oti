@@ -61,7 +61,7 @@ public class studies extends ServerPlugin {
 
 		if (property == null && value == null) {
 			// no property specified, find all studies
-			results.put("matched_studies", runner.doBasicSearchForTrees(new MatchAllDocsQuery(), null, verbose));
+			results.put("matched_studies", runner.doBasicSearchForStudies(new MatchAllDocsQuery(), null, verbose));
 
 		} else if ((property == null && value != null) || (property != null && value == null)) {
 			// property or value specified but not both, return error
