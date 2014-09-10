@@ -30,7 +30,7 @@ curl -X POST http://devapi.opentreeoflife.org/oti/ext/studies/graphdb/find_studi
 ### Search for studies with trees spanning the taxon with name "Annona glabra":
 
 ```bash
-curl -X POST http://devapi.opentreeoflife.org/ext/studies/graphdb/find_trees -H "content-type: application/json" -d '{"property":"ot:ottTaxonName","value":"Annona glabra"}'
+curl -X POST http://devapi.opentreeoflife.org/oti/ext/studies/graphdb/find_trees -H "content-type: application/json" -d '{"property":"ot:ottTaxonName","value":"Annona glabra"}'
 ```
 
 ```json
@@ -54,7 +54,7 @@ curl -X POST http://devapi.opentreeoflife.org/ext/studies/graphdb/find_trees -H 
 ### Get a list of properties available for searching studies and trees:
 
 ```bash
-curl -X POST http://devapi.opentreeolife.org/ext/studies/graphdb/properties
+curl -X POST http://devapi.opentreeoflife.org/oti/ext/studies/graphdb/properties
 ```
 
 ```json
