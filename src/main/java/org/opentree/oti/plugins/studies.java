@@ -51,7 +51,7 @@ public class studies extends ServerPlugin {
 			@Parameter(name = "value", optional = true)
 			String value,
 			
-			@Description("Whether to perform exact matching ONLY. Defaults to false, i.e. fuzzy matching is enabled. Fuzzy"
+			@Description("Whether to perform exact matching ONLY. Defaults to false, i.e. fuzzy matching is enabled. Fuzzy "
 					+ "matching is only available for some string properties.")
 			@Parameter(name="exact", optional = true)
 			Boolean checkExactOnly,
@@ -112,8 +112,8 @@ public class studies extends ServerPlugin {
 			@Parameter(name = "value", optional = false)
 			String value,
 			
-			@Description("Whether to perform exact matching ONLY. Defaults to false, i.e. fuzzy matching is enabled. Only "
-					+ "applicable for some string properties.")
+			@Description("Whether to perform exact matching ONLY. Defaults to false, i.e. fuzzy matching is enabled. Fuzzy "
+					+ "matching is only available for some string properties.")
 			@Parameter(name="exact", optional = true)
 			Boolean checkExactOnly,
 			
