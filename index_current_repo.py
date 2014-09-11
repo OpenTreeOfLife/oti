@@ -3,7 +3,6 @@
 # Command line arguments:
 #  - URL prefix for communicating with the OTI neo4j server
 #  - URL prefix for phylesystem API methods (not including 'v1/')
-#  - (future: URL for OTT tarball ?)
 
 import json, os, requests, sys, tarfile, urllib2
 
@@ -15,7 +14,8 @@ def get_download_dir():
 
 def submit_indexing_request(data):
 	'''Send a request to oti to index a single study. URL is set to default neo4j location'''
-	url = oti_url + "ext/IndexServices/graphdb/indexNexsons"
+#	url = oti_url + "ext/IndexServices/graphdb/indexNexsons"
+	url = oti_url + "ext/studies/graphdb/index_studies"
 	print 'Calling "{}" with data="{}"'.format(url, repr(data))
 	r = requests.post(url,
 					  data=json.dumps(data),
@@ -25,53 +25,12 @@ def submit_indexing_request(data):
 	r.raise_for_status()
 	return r.json()
 
-def load_taxonomy():
-	'''Install ott... Currently not used, we just supply a pre-built taxonomy database.'''
-	
-	# setup stuff for the download 
-	download_dir = get_download_dir()
-	ott_filename = ott_file_url.rsplit("/",1)[1]
-	ott_save_path = os.path.join(download_dir,ott_filename)
-
-	# download the taxonomy if necessary
-	if not os.path.exists(ott_save_path):
-		print("Downloading ott from " + ott_file_url + ".\nThis could take a while...")
-		req = urllib2.Request(ott_file_url)
-		f = urllib2.urlopen(req)
-
-		# write the taxonomy into the file
-		ottfile = file(ott_save_path, 'wb')
-		while True:
-			chunk = f.read(1000000)
-			if not chunk: break
-			ottfile.write (chunk)
-		ottfile.close()
-
-	# extract the taxonomy if necessary
-	tax_file_path = os.path.join(download_dir,"ott","taxonomy.tsv")
-	syn_file_path = os.path.join(download_dir,"ott","synonyms.tsv")
-	if not os.path.exists(tax_file_path) or not os.path.exists(syn_file_path):
-		os.chdir(download_dir)
-		tar = tarfile.open(ott_save_path)
-		tar.extractall()
-		tar.close()
-
-	# call the taxonomy loading routines
-	url = oti_url + "ext/ConfigurationServices/graphdb/installOTT"
-	data='{"taxonomyFile":"'+tax_file_path+'","synonymFile":"'+syn_file_path+'"}'
-	print('Calling "{}" with data="{}"'.format(url, repr(data)))
-	r = requests.post(url, data, headers={'Content-type': 'application/json'});
-
-	# We don't really need any data out of r.
-	# But do raise an error if something went wrong.
-	r.raise_for_status()
-
 # default args
 if len(sys.argv) > 1:
 	oti_url = sys.argv[1].rstrip("/") + "/"
 	# local oti url (example): http://localhost:7474/db/data/
 else:
-	print("usage (with defaults): index_current_repo.py <oti_url> [<target_phylesystem_repo_name>](==http://localhost/api/) [<ott_file_url>](==http://files.opentreeoflife.org/ott/ott2.8draft3.tgz)")
+	print("usage (with defaults): index_current_repo.py <oti_url> [<target_phylesystem_repo_name>](==http://localhost/api/)")
 	sys.exit(0)
 print("Using the oti instance at: " + oti_url) 
 
@@ -81,12 +40,6 @@ else:
 	api_url = "http://localhost/api/"
 #files_base_url = "https://raw.github.com/OpenTreeOfLife/%s/master"%(oti_repo)
 print("Using the studies from: " + api_url) 
-
-if len(sys.argv) > 3:
-	ott_file_url = sys.argv[3]
-else:
-	ott_file_url = "http://files.opentreeoflife.org/ott/ott2.8draft3.tgz"
-#print("Using the ott taxonomy at: " + ott_file_url) 
 
 # Ignoring oti_mode for now, since we're using the local API to retrieve study
 # ids and NexSON in the required format.
@@ -109,9 +62,6 @@ make_url = lambda study_id: api_url + "default/v1/study/{}.json".format(study_id
 # PROBLEM: URL formation are rules in the two cases.
 
 # right now we are not loading the taxonomy, any taxonomy must be provided as a pre-built database
-load_taxonomy = False
-if load_taxonomy:
-	load_taxonomy()
 
 # retrieve the study list
 r = requests.get(api_url + "study_list")
