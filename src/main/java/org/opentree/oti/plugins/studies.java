@@ -40,16 +40,25 @@ public class studies extends ServerPlugin {
 	@Description("Perform a simple search for indexed studies. To find all studies, omit both the property and the value from your query.")
 	@PluginTarget(GraphDatabaseService.class)
 	public Representation find_studies(@Source GraphDatabaseService graphDb,
-			@Description("The property to be searched on. A list of searchable properties is available from the getSearchablePropertiesForStudies service."
-					+ "To find all studies, omit both the property and the value from your query.")
-				@Parameter(name = "property", optional = true) String property,
-			@Description("The value to be searched. This must be passed as a string, but will be converted to the datatype corresponding to the "
-					+ "specified searchable value. To find all studies, omit both the property and the value from your query.")
-				@Parameter(name = "value", optional = true) String value,
-			@Description("Whether to perform exact matching ONLY. Defaults to false, i.e. fuzzy matching is enabled. Fuzzy matching is only applicable for some string properties.")
-				@Parameter(name="exact", optional = true) Boolean checkExactOnly,
+			@Description("The property to be searched on. A list of searchable properties is available from the "
+					+ "[properties](#properties) service. To find all studies, omit both the property and the value from your query.")
+			@Parameter(name = "property", optional = true)
+			String property,
+			
+			@Description("The value to be searched. This must be passed as a string, but will be converted to the datatype "
+					+ "corresponding to the specified searchable value. To find all studies, omit both the property and the "
+					+ "value from your query.")
+			@Parameter(name = "value", optional = true)
+			String value,
+			
+			@Description("Whether to perform exact matching ONLY. Defaults to false, i.e. fuzzy matching is enabled. Fuzzy"
+					+ "matching is only available for some string properties.")
+			@Parameter(name="exact", optional = true)
+			Boolean checkExactOnly,
+			
 			@Description("Whether or not to include all metadata. By default, only the nexson ids of elements will be returned.")
-				@Parameter(name = "verbose", optional = true) Boolean verbose) throws ParseException {
+			@Parameter(name = "verbose", optional = true)
+			Boolean verbose) throws ParseException {
 		
 		// set null optional parameters to default values
 		verbose = verbose == null ? false : verbose;
@@ -90,17 +99,27 @@ public class studies extends ServerPlugin {
 	 * @param value
 	 * @return
 	 */
-	@Description("Perform a simple search for trees in indexed studies")
+	@Description("Perform a simple search for trees in indexed studies.")
 	@PluginTarget(GraphDatabaseService.class)
 	public Representation find_trees(@Source GraphDatabaseService graphDb,
-			@Description("The property to be searched on. A list of searchable properties is available from the getSearchablePropertiesForTrees service.")
-				@Parameter(name = "property", optional = false) String property,
-			@Description("The value to be searched. This must be passed as a string, but will be converted to the datatype corresponding to the "
-					+ "specified searchable value.") @Parameter(name = "value", optional = false) String value,
-			@Description("Whether to perform exact matching ONLY. Defaults to false, i.e. fuzzy matching is enabled. Only applicable for some string properties.")
-				@Parameter(name="exact", optional = true) Boolean checkExactOnly,
+			@Description("The property to be searched on. A list of searchable properties is available from the "
+					+ "[properties](#properties) service.")
+			@Parameter(name = "property", optional = false)
+			String property,
+			
+			@Description("The value to be searched. This must be passed as a string, but will be converted to the datatype "
+					+ "corresponding to the specified searchable value.")
+			@Parameter(name = "value", optional = false)
+			String value,
+			
+			@Description("Whether to perform exact matching ONLY. Defaults to false, i.e. fuzzy matching is enabled. Only "
+					+ "applicable for some string properties.")
+			@Parameter(name="exact", optional = true)
+			Boolean checkExactOnly,
+			
 			@Description("Whether or not to include all metadata. By default, only the nexson ids of elements will be returned.")
-				@Parameter(name = "verbose", optional = true) Boolean verbose) {
+			@Parameter(name = "verbose", optional = true)
+			Boolean verbose) {
 		
 		// set null optional parameters to default values
 		verbose = verbose == null ? false : verbose;
@@ -153,7 +172,9 @@ public class studies extends ServerPlugin {
 			"array containing the study ids for the studies that were successfully read and indexed.")
 	@PluginTarget(GraphDatabaseService.class)
 	public Representation index_studies(@Source GraphDatabaseService graphDb,
-			@Description("remote nexson urls") @Parameter(name = "urls", optional = false) String[] urls) throws MalformedURLException, IOException {
+			@Description("remote nexson urls")
+			@Parameter(name = "urls", optional = false)
+			String[] urls) throws MalformedURLException, IOException {
 
 		if (urls.length < 1) {
 			throw new IllegalArgumentException("You must provide at least one url for a nexson document to be indexed.");
@@ -165,10 +186,8 @@ public class studies extends ServerPlugin {
 		for (int i = 0; i < urls.length; i++) {
 			try {
 				NexsonSource study = readRemoteNexson(urls[i]);
-//				if (study.getTrees().iterator().hasNext()) {
-					manager.addOrReplaceStudy(study);
-					indexedIDs.add(study.getId());
-//				}
+				manager.addOrReplaceStudy(study);
+				indexedIDs.add(study.getId());
 			} catch (Exception ex) {
 				idsWithErrors.put(urls[i], ex.getMessage());
 			}
