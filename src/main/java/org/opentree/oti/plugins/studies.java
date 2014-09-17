@@ -154,7 +154,7 @@ public class studies extends ServerPlugin {
 
 		OTIProperties properties = new OTIProperties();
 		results.put("study_properties", properties.getIndexedStudyProperties().keySet());
-		results.put("tree_properties", properties.getIndexedStudyProperties().keySet());
+		results.put("tree_properties", properties.getIndexedTreeProperties().keySet());
 		
 		return OTRepresentationConverter.convert(results);
 	}
