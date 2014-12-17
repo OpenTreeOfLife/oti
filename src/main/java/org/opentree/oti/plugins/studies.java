@@ -41,7 +41,8 @@ public class studies extends ServerPlugin {
 	@PluginTarget(GraphDatabaseService.class)
 	public Representation find_studies(@Source GraphDatabaseService graphDb,
 			@Description("The property to be searched on. A list of searchable properties is available from the "
-					+ "[properties](#properties) service. To find all studies, omit both the property and the value from your query.")
+					+ "[properties](#properties) service (note that the 'find_studies' and 'find_trees' services "
+					+ "have distinct search properties). To find all studies, omit both the property and the value from your query.")
 			@Parameter(name = "property", optional = true)
 			String property,
 			
@@ -103,7 +104,8 @@ public class studies extends ServerPlugin {
 	@PluginTarget(GraphDatabaseService.class)
 	public Representation find_trees(@Source GraphDatabaseService graphDb,
 			@Description("The property to be searched on. A list of searchable properties is available from the "
-					+ "[properties](#properties) service.")
+					+ "[properties](#properties) service (note that the 'find_studies' and 'find_trees' services "
+					+ "have distinct search properties).")
 			@Parameter(name = "property", optional = false)
 			String property,
 			
@@ -198,7 +200,6 @@ public class studies extends ServerPlugin {
 		return OTRepresentationConverter.convert(results);
 
 	}
-
 
 	/**
 	 * Remove nexson data (if found) by study id
