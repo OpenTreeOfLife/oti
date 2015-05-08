@@ -13,6 +13,7 @@ import java.util.Set;
 
 import jade.tree.JadeNode;
 import jade.tree.JadeTree;
+import jade.tree.TreeNode;
 
 import org.opentree.graphdb.DatabaseUtils;
 import org.opentree.graphdb.GraphDatabaseAgent;
@@ -365,10 +366,10 @@ public class DatabaseManager extends OTIDatabase {
 	 * @param parentGraphNode
 	 * @return
 	 */
-	private Node preorderAddTreeToDB(JadeNode curJadeNode, Node parentGraphNode) {
+	private Node preorderAddTreeToDB(TreeNode curJadeNode, Node parentGraphNode) {
 
 		Node curGraphNode = graphDb.createNode();
-		NexsonNode curNexsonNode = (NexsonNode) curJadeNode.getObject(NexsonNode.NEXSON_NODE_JADE_OBJECT_KEY);
+		NexsonNode curNexsonNode = (NexsonNode) ((JadeNode)curJadeNode).getObject(NexsonNode.NEXSON_NODE_JADE_OBJECT_KEY);
 
 		// remember the ingroup if we hit one // TODO: might be able to clean this up by using the tree property set during nexson parsing...
 		if (curNexsonNode.hasProperty(OTINodeProperty.IS_INGROUP_ROOT.propertyName())) {
@@ -395,7 +396,7 @@ public class DatabaseManager extends OTIDatabase {
 			curGraphNode.createRelationshipTo(parentGraphNode, OTIRelType.CHILDOF);
 		}
 
-		for (JadeNode childJadeNode : curJadeNode.getChildren()) {
+		for (TreeNode childJadeNode : curJadeNode.getChildren()) {
 			preorderAddTreeToDB(childJadeNode, curGraphNode);
 		}
 
@@ -435,9 +436,9 @@ public class DatabaseManager extends OTIDatabase {
 		compatibleHigherTaxonOTTIds = new HashSet<Long>();
 		compatibleHigherTaxonNames = new HashSet<String>();
 		
-		for (JadeNode tip : tree.getRoot().getDescendantLeaves()) {
+		for (TreeNode tip : tree.getRoot().getDescendantLeaves()) {
 			
-			NexsonOTU otu = ((NexsonNode) tip.getObject(NexsonNode.NEXSON_NODE_JADE_OBJECT_KEY)).getOTU();
+			NexsonOTU otu = ((NexsonNode) ((JadeNode)tip).getObject(NexsonNode.NEXSON_NODE_JADE_OBJECT_KEY)).getOTU();
 
 			if (otu != null) { // TODO: this indicates invalid nexson: the otu assigned to this tip cannot be found. should we even allow this case?
 				
