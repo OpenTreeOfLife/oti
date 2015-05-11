@@ -168,10 +168,10 @@ public class studies extends ServerPlugin {
 	 * @throws MalformedURLException
 	 * @throws IOException
 	 */
-	@Description("Index the nexson data at the provided urls. If a nexson study to be indexed has an identical ot:studyId value to a " +
-			"previously indexed study, then the previous information for that study will be replaced by the incoming nexson. Returns an " +
-			"array containing the study ids for the studies that were successfully read and indexed.")
+	@Description("DEPRECATED. Use the index_single_study service instead.")
 	@PluginTarget(GraphDatabaseService.class)
+	@Deprecated
+	// TODO: remove this from the next iteration of the API 
 	public Representation index_studies(@Source GraphDatabaseService graphDb,
 			@Description("remote nexson urls")
 			@Parameter(name = "urls", optional = false)
@@ -187,15 +187,9 @@ public class studies extends ServerPlugin {
 		HashMap<String, String> typesWithErrors = new HashMap<String, String>();
 		DatabaseManager manager = new DatabaseManager(graphDb);
 		for (int i = 0; i < urls.length; i++) {
-			try {
-				NexsonSource study = readRemoteNexson(urls[i]);
-				manager.addOrReplaceStudy(study);
-				indexedIDs.add(study.getId());
-			} catch (Exception ex) {
-				idsWithStacktraces.put(urls[i], Arrays.toString(ex.getStackTrace()));
-				idsWithErrors.put(urls[i], ex.getMessage());
-				typesWithErrors.put(urls[i], ex.getClass().getName());
-			}
+			NexsonSource study = readRemoteNexson(urls[i]);
+			manager.addOrReplaceStudy(study);
+			indexedIDs.add(study.getId());
 		}
 		HashMap<String, Object> results = new HashMap<String, Object>(); // will be converted to JSON object
 		results.put("indexed", indexedIDs);
@@ -206,6 +200,32 @@ public class studies extends ServerPlugin {
 	}
 
 
+	/**
+	 * Index the nexson data accessible at the passed url(s).
+	 * @param graphDb
+	 * @param url
+	 * @return
+	 * @throws MalformedURLException
+	 * @throws IOException
+	 */
+	@Description("Index the nexson study at the provided url. If the study to be indexed has an identical ot:studyId value to a " +
+	"previously indexed study, then the previous information for that study will be replaced by the incoming nexson. Returns true " +
+	"on successful indexing, or reports an error if one is encountered.")
+	@PluginTarget(GraphDatabaseService.class)
+	public Representation index_single_study(@Source GraphDatabaseService graphDb,
+			@Description("remote nexson url")
+			@Parameter(name = "url", optional = false)
+			String url) throws MalformedURLException, IOException {
+
+		DatabaseManager manager = new DatabaseManager(graphDb);
+
+		NexsonSource study = readRemoteNexson(url);
+		manager.addOrReplaceStudy(study);
+
+		return OTRepresentationConverter.convert(true);
+	}
+
+	
 	/**
 	 * Remove nexson data (if found) by study id
 	 * @param graphDb
