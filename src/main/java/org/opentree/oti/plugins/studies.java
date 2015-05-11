@@ -190,7 +190,7 @@ public class studies extends ServerPlugin {
 		}
 		HashMap<String, Object> results = new HashMap<String, Object>(); // will be converted to JSON object
 		results.put("indexed", indexedIDs);
-		results.put("errors", new ArrayList());
+		results.put("errors", new HashMap());
 		return OTRepresentationConverter.convert(results);
 	}
 
