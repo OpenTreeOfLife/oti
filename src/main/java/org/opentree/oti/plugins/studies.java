@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -182,6 +183,8 @@ public class studies extends ServerPlugin {
 		
 		ArrayList<String> indexedIDs = new ArrayList<String>(urls.length);
 		HashMap<String, String> idsWithErrors = new HashMap<String, String>();
+		HashMap<String, String> idsWithStacktraces = new HashMap<String, String>();
+		HashMap<String, String> typesWithErrors = new HashMap<String, String>();
 		DatabaseManager manager = new DatabaseManager(graphDb);
 		for (int i = 0; i < urls.length; i++) {
 			try {
@@ -189,14 +192,17 @@ public class studies extends ServerPlugin {
 				manager.addOrReplaceStudy(study);
 				indexedIDs.add(study.getId());
 			} catch (Exception ex) {
+				idsWithStacktraces.put(urls[i], Arrays.toString(ex.getStackTrace()));
 				idsWithErrors.put(urls[i], ex.getMessage());
+				typesWithErrors.put(urls[i], ex.getClass().getName());
 			}
 		}
 		HashMap<String, Object> results = new HashMap<String, Object>(); // will be converted to JSON object
 		results.put("indexed", indexedIDs);
 		results.put("errors", idsWithErrors);
+		results.put("error_types", typesWithErrors);
+		results.put("stack_traces", idsWithStacktraces);
 		return OTRepresentationConverter.convert(results);
-
 	}
 
 
