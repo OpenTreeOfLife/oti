@@ -168,7 +168,7 @@ public class studies extends ServerPlugin {
 	 * @throws MalformedURLException
 	 * @throws IOException
 	 */
-	@Description("DEPRECATED. Use the index_single_study service instead.")
+	@Description("DEPRECATED. Use the index_study service instead.")
 	@PluginTarget(GraphDatabaseService.class)
 	@Deprecated
 	// TODO: remove this from the next iteration of the API 
