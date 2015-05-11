@@ -212,7 +212,7 @@ public class studies extends ServerPlugin {
 	"previously indexed study, then the previous information for that study will be replaced by the incoming nexson. Returns true " +
 	"on successful indexing, or reports an error if one is encountered.")
 	@PluginTarget(GraphDatabaseService.class)
-	public Representation index_single_study(@Source GraphDatabaseService graphDb,
+	public Representation index_study(@Source GraphDatabaseService graphDb,
 			@Description("remote nexson url")
 			@Parameter(name = "url", optional = false)
 			String url) throws MalformedURLException, IOException {
