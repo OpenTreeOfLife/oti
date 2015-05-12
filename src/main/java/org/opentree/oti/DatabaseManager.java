@@ -362,14 +362,14 @@ public class DatabaseManager extends OTIDatabase {
 	
 	/**
 	 * A recursive function used to replicate the tree JadeNode structure below the passed in JadeNode in the graph.
-	 * @param curJadeNode
+	 * @param curNexsonNode
 	 * @param parentGraphNode
 	 * @return
 	 */
-	private Node preorderAddTreeToDB(TreeNode curJadeNode, Node parentGraphNode) {
+	private Node preorderAddTreeToDB(NexsonNode curNexsonNode, Node parentGraphNode) {
 
 		Node curGraphNode = graphDb.createNode();
-		NexsonNode curNexsonNode = (NexsonNode) ((JadeNode)curJadeNode).getObject(NexsonNode.NEXSON_NODE_JADE_OBJECT_KEY);
+//		NexsonNode curNexsonNode = (NexsonNode) ((JadeNode)curJadeNode).getObject(NexsonNode.NEXSON_NODE_JADE_OBJECT_KEY);
 
 		// remember the ingroup if we hit one // TODO: might be able to clean this up by using the tree property set during nexson parsing...
 		if (curNexsonNode.hasProperty(OTINodeProperty.IS_INGROUP_ROOT.propertyName())) {
@@ -396,8 +396,8 @@ public class DatabaseManager extends OTIDatabase {
 			curGraphNode.createRelationshipTo(parentGraphNode, OTIRelType.CHILDOF);
 		}
 
-		for (TreeNode childJadeNode : curJadeNode.getChildren()) {
-			preorderAddTreeToDB(childJadeNode, curGraphNode);
+		for (TreeNode child : curNexsonNode.getChildren()) {
+			preorderAddTreeToDB((NexsonNode) child, curGraphNode);
 		}
 
 		indexer.addTreeNodeToIndexes(curGraphNode);
@@ -438,7 +438,8 @@ public class DatabaseManager extends OTIDatabase {
 		
 		for (TreeNode tip : tree.getRoot().getDescendantLeaves()) {
 			
-			NexsonOTU otu = ((NexsonNode) ((JadeNode)tip).getObject(NexsonNode.NEXSON_NODE_JADE_OBJECT_KEY)).getOTU();
+//			NexsonOTU otu = ((NexsonNode) ((JadeNode)tip).getObject(NexsonNode.NEXSON_NODE_JADE_OBJECT_KEY)).getOTU();
+			NexsonOTU otu = ((NexsonNode) tip).getOTU();
 
 			if (otu != null) { // TODO: this indicates invalid nexson: the otu assigned to this tip cannot be found. should we even allow this case?
 				
