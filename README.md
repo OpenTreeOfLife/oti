@@ -6,13 +6,23 @@ An indexing tool for nexsons.
 Install
 -----
 
-####Clone the repo:
+####Clone the repo
 
 First, clone a copy of the oti repo on your local machine.
 
 ```
 git clone https://github.com/OpenTreeOfLife/oti.git
 ```
+
+####Clone the repo
+
+Set JAVA_HOME.  On OS X 10.9.5 with Java 8, you have to do
+
+    export JAVA_HOME=`/usr/libexec/java_home`
+
+The incantation will be different on other kinds of system.  Finding
+the right method may involve consulting stackoverflow and the involve
+parent of the target of the /usr/bin/java symbolic link.
 
 ####Install dependencies
 

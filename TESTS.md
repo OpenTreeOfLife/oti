@@ -1,8 +1,44 @@
-Currently, there are no automated test procedures for OTI. You can however, fairly thoroughly test the performance manually. Run the following command to index the current phylesystem repo on devapi.opentreeoflife.org:
+
+## Work in progress: automated web service tests
+
+To run them:
+
+    cd ws-tests
+    export PYTHONPATH={path to phylesystem-api repo}/ws-tests:$PYTHONPATH
+    {path to phylesystem-api repo}/ws-tests/run_tests.sh devapi.opentreeoflife.org
+
+(It might be more convenient to copy opentreetesting.py and
+run_tests.sh locally, rather than refer to the phylesystem-api repo
+all the time.)
+
+Substitute whatever API host you're testing for devapi.opentreeoflife.org.
+
+Any test can be run individually:
+
+    cd ws-tests
+    export PYTHONPATH={path to phylesystem-api repo}/ws-tests:$PYTHONPATH
+    python test_basic.py host:apihost=http://devapi.opentreeoflife.org
+
+You can test against a locally running neo4j instance:
+
+    cd ws-tests
+    export PYTHONPATH={path to phylesystem-api repo}/ws-tests:$PYTHONPATH
+    python test_basic.py host:apihost=http://localhost:7474 host:translate=true
+
+When writing tests, the utilities in the opentreetesting.py library are available.
+
+For more information on the test harness, see [here](https://github.com/OpenTreeOfLife/phylesystem-api/blob/master/ws-tests/README.md).
+
+
+## Manual tests
+
+Currently, there few automated tests for OTI. You can, however, fairly thoroughly test the performance manually. Run the following command to index the current phylesystem repo on devapi.opentreeoflife.org:
 
 ```bash
 ./index_current_repo.py http://devapi.opentreeoflife.org/oti http://devapi.opentreeoflife.org/api
 ```
+
+(For a less time consuming test, try the asterales endpoint.)
 
 And then (assuming indexing worked), query the database to test it. Here are some example queries using cURL, and their expected results.
 
