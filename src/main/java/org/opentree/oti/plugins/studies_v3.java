@@ -163,7 +163,7 @@ public class studies_v3 extends ServerPlugin {
             List list = (List)obj;
             for (Object sub : list)
                 scrubSuperfluousProperties(sub);
-        } else if (obj instanceof String || obj instanceof Number)
+        } else if (obj instanceof String || obj instanceof Number || obj instanceof Boolean)
             ;
         else
             throw new RuntimeException("unexpected type in JSON traversal?? " + obj);
