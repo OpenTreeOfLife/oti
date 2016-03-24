@@ -23,6 +23,7 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.server.plugins.*;
 import org.neo4j.server.rest.repr.OTRepresentationConverter;
 import org.neo4j.server.rest.repr.Representation;
+import org.neo4j.server.rest.repr.BadInputException;
 import org.opentree.properties.OTPropertyPredicate;
 
 /**
@@ -62,7 +63,8 @@ public class studies_v3 extends ServerPlugin {
 			
 			@Description("Whether or not to include all metadata. By default, only the nexson ids of elements will be returned.")
 			@Parameter(name = "verbose", optional = true)
-			Boolean verbose) throws ParseException {
+			Boolean verbose) throws ParseException, BadInputException
+    {
 		
 		// set null optional parameters to default values
 		verbose = verbose == null ? false : verbose;
@@ -78,7 +80,7 @@ public class studies_v3 extends ServerPlugin {
 
 		} else if ((property == null && value != null) || (property != null && value == null)) {
 			// property or value specified but not both, return error
-			results.put("error", "You either specified a property but not a value, or a value but not a property. " +
+			throw new BadInputException("You either specified a property but not a value, or a value but not a property. " +
 					    "If you specify a property or a value, you must specify both. You may alternatively specify " +
 					    "neither to find all studies.");
 
@@ -87,20 +89,11 @@ public class studies_v3 extends ServerPlugin {
 			HashSet<OTPropertyPredicate> searchProperties = new OTIProperties().getIndexedStudyProperties().get(property);
 					
 			if (searchProperties != null) {
-                List<HashMap<String, Object>> matches =
+                Object matches =
                     runner.doBasicSearchForStudies(searchProperties, value, doFuzzyMatching, verbose);
-                for (HashMap<String, Object> result : matches) {
-                    Map<String, Object> trees = (Map<String, Object>) (result.get("matched_trees"));
-                    for (Object treeObj : trees.values()) {
-                        Map<String, Object> tree = (Map<String, Object>)treeObj;
-                        tree.remove("ot:ottId");
-                        tree.remove("ot:originalLabel");
-                        tree.remove("ot:ottTaxonName");
-                    }
-                }
 				results.put("matched_studies", matches);
 			} else {
-				results.put("error", "unrecognized property: " + property);
+				throw new BadInputException("unrecognized property: " + property);
 			}
 		}
 		
@@ -135,7 +128,9 @@ public class studies_v3 extends ServerPlugin {
 			
 			@Description("Whether or not to include all metadata. By default, only the nexson ids of elements will be returned.")
 			@Parameter(name = "verbose", optional = true)
-			Boolean verbose) {
+			Boolean verbose)
+        throws BadInputException
+    {
 		
 		// set null optional parameters to default values
 		verbose = verbose == null ? false : verbose;
@@ -146,15 +141,35 @@ public class studies_v3 extends ServerPlugin {
 
 		if (searchProperties != null) {
 			QueryRunner runner = new QueryRunner(graphDb);
-			results.put("matched_studies", runner.doBasicSearchForTrees(searchProperties, value, doFuzzyMatching, verbose));
+			Object studies = runner.doBasicSearchForTrees(searchProperties, value, doFuzzyMatching, verbose);
+			results.put("matched_studies", scrubSuperfluousProperties(studies));
 		} else {
-			results.put("error", "unrecognized property: " + property);
+			throw new BadInputException("unrecognized property: " + property);
 		}
 		
 		return OTRepresentationConverter.convert(results);
 
 	}
 	
+    Object scrubSuperfluousProperties(Object obj) {
+        if (obj instanceof Map) {
+            Map<String, Object> map = (Map<String, Object>)obj;
+            map.remove("ot:ottId");
+            map.remove("ot:originalLabel");
+            map.remove("ot:ottTaxonName");
+            for (Object sub : map.values())
+                scrubSuperfluousProperties(sub);
+        } else if (obj instanceof List) {
+            List list = (List)obj;
+            for (Object sub : list)
+                scrubSuperfluousProperties(sub);
+        } else if (obj instanceof String || obj instanceof Number)
+            ;
+        else
+            throw new RuntimeException("unexpected type in JSON traversal?? " + obj);
+        return obj;
+    }
+
 	/**
 	 * Return a map containing available property names and the names of the SearchableProperty enum elements they
 	 * correspond to.
@@ -190,7 +205,9 @@ public class studies_v3 extends ServerPlugin {
 	public Representation index_studies(@Source GraphDatabaseService graphDb,
 			@Description("remote nexson urls")
 			@Parameter(name = "urls", optional = false)
-			String[] urls) throws MalformedURLException, IOException {
+			String[] urls)
+        throws MalformedURLException, IOException, BadInputException
+    {
 
 		if (urls.length < 1) {
 			throw new IllegalArgumentException("You must provide at least one url for a nexson document to be indexed.");
@@ -248,8 +265,9 @@ public class studies_v3 extends ServerPlugin {
             "not be found (and throws exceptions for those whose removal failed.")
 	@PluginTarget(GraphDatabaseService.class)
 	public Representation unindex_studies(@Source GraphDatabaseService graphDb,
-			@Description("doomed nexson ids") @Parameter(name = "ids", optional = false) String[] ids) throws IOException {
-
+			@Description("doomed nexson ids") @Parameter(name = "ids", optional = false) String[] ids)
+        throws IOException, BadInputException
+    {
 		if (ids.length < 1) {
 			throw new IllegalArgumentException("You must provide at least one id for a nexson document to be removed.");
 		}
@@ -283,7 +301,6 @@ public class studies_v3 extends ServerPlugin {
 		results.put("not_found", idsNotFound);
 		results.put("errors", idsWithErrors);
 		return OTRepresentationConverter.convert(results);
-
 	}
 
 	/**
