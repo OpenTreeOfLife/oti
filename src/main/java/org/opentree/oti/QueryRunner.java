@@ -59,7 +59,7 @@ public class QueryRunner extends OTIDatabase {
 	 * 		A list of strings containing the node ids of the source meta nodes for sources found during search
 	 * @throws ParseException 
 	 */
-	public Object doBasicSearchForStudies(Set<OTPropertyPredicate> properties, String searchValue, boolean checkFulltext, boolean verbose) throws ParseException {
+	public List<HashMap<String, Object>> doBasicSearchForStudies(Set<OTPropertyPredicate> properties, String searchValue, boolean checkFulltext, boolean verbose) throws ParseException {
 
 		BooleanQuery query = new BooleanQuery();
 		query.setMinimumNumberShouldMatch(1);
@@ -171,7 +171,7 @@ public class QueryRunner extends OTIDatabase {
 	 * @param verbose
 	 * @return
 	 */
-	public Object doBasicSearchForStudies(Query query, Map<String,Object> exactProperties, boolean verbose) {		
+	public List<HashMap<String, Object>> doBasicSearchForStudies(Query query, Map<String,Object> exactProperties, boolean verbose) {		
 		
 		if (query == null && (exactProperties == null || exactProperties.isEmpty())) {
 			throw new IllegalArgumentException("Request to do a query where neither exact nor fulltext indexes are to be searched. This is illegal--at least one type of indexed must be searched.");
