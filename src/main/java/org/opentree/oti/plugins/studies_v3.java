@@ -76,7 +76,9 @@ public class studies_v3 extends ServerPlugin {
 
 		if (property == null && value == null) {
 			// no property specified, find all studies
-			results.put("matched_studies", runner.doBasicSearchForStudies(new MatchAllDocsQuery(), null, verbose));
+            Object matches = runner.doBasicSearchForStudies(new MatchAllDocsQuery(), null, verbose);
+			// was results.put("matched_studies", matches);
+			results.put("matched_studies", scrubSuperfluousProperties(matches));
 
 		} else if ((property == null && value != null) || (property != null && value == null)) {
 			// property or value specified but not both, return error
@@ -91,7 +93,8 @@ public class studies_v3 extends ServerPlugin {
 			if (searchProperties != null) {
                 Object matches =
                     runner.doBasicSearchForStudies(searchProperties, value, doFuzzyMatching, verbose);
-				results.put("matched_studies", matches);
+				// was results.put("matched_studies", matches);
+                results.put("matched_studies", scrubSuperfluousProperties(matches));
 			} else {
 				throw new BadInputException("unrecognized property: " + property);
 			}
@@ -157,6 +160,7 @@ public class studies_v3 extends ServerPlugin {
             map.remove("ot:ottId");
             map.remove("ot:originalLabel");
             map.remove("ot:ottTaxonName");
+            map.remove("is_deprecated");
             for (Object sub : map.values())
                 scrubSuperfluousProperties(sub);
         } else if (obj instanceof List) {
