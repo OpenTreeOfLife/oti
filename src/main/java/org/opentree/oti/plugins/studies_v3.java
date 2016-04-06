@@ -107,8 +107,10 @@ public class studies_v3 extends ServerPlugin {
 	/**
 	 * Perform a simple search for trees
 	 * @param graphDb
-	 * @param propertyName
+	 * @param property
 	 * @param value
+	 * @param checkExactOnly
+	 * @param verbose
 	 * @return
 	 */
 	@Description("Perform a simple search for trees in indexed studies.")
