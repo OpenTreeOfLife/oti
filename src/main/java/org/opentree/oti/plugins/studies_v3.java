@@ -36,8 +36,9 @@ public class studies_v3 extends ServerPlugin {
 	/**
 	 * Perform a simple search for studies
 	 * @param graphDb
-	 * @param propertyName
+	 * @param property
 	 * @param value
+	 * @param verbose
 	 * @return
 	 * @throws ParseException 
 	 */
