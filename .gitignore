@@ -7,3 +7,5 @@ target*
 views/logging
 views/bitbucketcommands
 views/test_bitbucket.py
+*~
+.out_test_*
