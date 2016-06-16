@@ -18,7 +18,7 @@ def main():
     print("Using the oti instance at: " + oti_url) 
 
     if len(sys.argv) > 2:
-        api_url = sys.argv[2].strip("/") + "/"
+        api_url = sys.argv[2].strip("/") + "/v3/studies/"
     else:
         api_url = "http://localhost/phylesystem/"
     #files_base_url = "https://raw.github.com/OpenTreeOfLife/%s/master"%(oti_repo)
