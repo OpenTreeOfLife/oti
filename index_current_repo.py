@@ -52,7 +52,7 @@ if __name__ == '__main__':
     print("Using the oti instance at: " + oti_url) 
 
     if len(sys.argv) > 2:
-        api_url = sys.argv[2].rstrip("/") + "/v3/"
+        api_url = sys.argv[2].rstrip("/")
     else:
         api_url = "http://localhost/phylesystem/v1/"
     print("Accessing studies via: " + api_url) 
