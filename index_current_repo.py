@@ -18,7 +18,7 @@ def main():
     print("Using the oti instance at: " + oti_url) 
 
     if len(sys.argv) > 2:
-        api_url = sys.argv[2].strip("/") + "/"
+        api_url = sys.argv[2].strip("/") + "/v3/"
     else:
         api_url = "http://localhost/phylesystem/"
     #files_base_url = "https://raw.github.com/OpenTreeOfLife/%s/master"%(oti_repo)
@@ -39,7 +39,7 @@ def main():
     ##else:
     ##    print("Unrecognized mode {}".format(oti_mode))
 
-    make_study_url = lambda study_id: api_url + "default/v1/study/{}.json".format(study_id)
+    make_study_url = lambda study_id: api_url + "study/{}.json".format(study_id)
 
     # right now we are not loading the taxonomy, any taxonomy must be provided as a pre-built database
 
