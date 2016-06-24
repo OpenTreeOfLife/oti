@@ -2,23 +2,25 @@
 
 # Command line arguments:
 #  - URL prefix for communicating with the OTI neo4j server, just
-#      before the neo4j plugin method name (which is 'index_study')
+#      before the neo4j plugin method name (which is 'index_study').
+#      E.g. http://127.0.0.1:7478/db/data/ext/studies_v3/graphdb
 #  - URL prefix for phylesystem API, the part just before '/study/...'
-#      or '/study_list'
+#      or '/study_list'.
+#      E.g. https://devapi.opentreeoflife.org
 
 import json, os, requests, sys, tarfile, urllib2
 
-def index_repo(oti_url, api_url):
+def index_repo(oti_url, phylesystem_api_url):
 
     # retrieve the study list
-    r = requests.get(api_url + "study_list")
+    r = requests.get(phylesystem_api_url + "study_list")
     r.raise_for_status()
 
     study_list = r.json()
-    print(" Indexing {} studies from {}".format(len(study_list), api_url))
+    print(" Indexing {} studies from {}".format(len(study_list), phylesystem_api_url))
 
     for study_id in study_list:
-        url = "{}study/{}.json".format(api_url, study_id)
+        url = "{}study/{}.json".format(phylesystem_api_url, study_id)
         print("Indexing study {} from {}".format(study_id, url))
         try:
             r = submit_indexing_request(oti_url, {"url" : url })
@@ -52,12 +54,12 @@ if __name__ == '__main__':
     print("Using the oti instance at: " + oti_url) 
 
     if len(sys.argv) > 2:
-        api_url = sys.argv[2].rstrip("/") + "/"
+        phylesystem_api_url = sys.argv[2].rstrip("/") + "/"
     else:
-        api_url = "http://localhost/phylesystem/v1/"
-    print("Accessing studies via: " + api_url) 
+        phylesystem_api_url = "http://localhost/phylesystem/v1/"
+    print("Accessing studies via: " + phylesystem_api_url) 
 
-    index_repo(oti_url, api_url)
+    index_repo(oti_url, phylesystem_api_url)
 
 
 # additional code that is not currently used but may come in handy below here
