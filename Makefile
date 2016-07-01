@@ -1,3 +1,6 @@
+# This is just a throwaway set of useful commands - nothing depends on
+# this Makefile currently.  The purpose is to support local testing.
+
 # 1. Set up neo4j with 'make neo4j'
 # 2. Optional: install a taxomachine graph db in data/graph.db (this
 #    is only needed for taxonomy-aware queries)
