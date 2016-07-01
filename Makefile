@@ -40,7 +40,7 @@ stop:
 	$(NEO)/bin/neo4j stop
 	rm -f .running
 
-# use dev phylesystem for testing... may not work
+# use dev phylesystem for testing... 
 index-repo: $(NEO)
 	python index_current_repo.py \
 	   http://127.0.0.1:7478/db/data/ext/studies_v3/graphdb \
