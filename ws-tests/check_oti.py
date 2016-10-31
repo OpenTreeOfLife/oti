@@ -7,6 +7,7 @@ study_fields = [field(u'ot:studyPublicationReference', check_string),
                 field(u'ot:focalCladeOTTTaxonName', check_string),
                 field(u'ot:dataDeposit', check_string),
                 field(u'ot:studyPublication', check_string),
+                field(u'ot:candidateTreeForSynthesis', check_string),
                 field(u'ot:studyYear', check_integer)]
 
 check_study = check_blob(study_fields)
